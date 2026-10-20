@@ -1,8 +1,39 @@
 # Vibecoding Project Tracker — PRD
 
 **Status:** Hackathon starter PRD · review and fill in the **`<TODO>`** sections before you tag `prd-done`.
-
 ---
+## Functional Requirements
+- FR1: The system must allow users to create a new task card.
+- FR2: The system must ensure task card consist of a title, description, type (feature/bug), status, assignee, due date and created date. 
+- FR3: The system must allow users to edit a task via modal.
+- FR4: The system must allow users to delete a task via modal. 
+- FR5: The system must display tasks inside columns on a Kanban board 
+- FR6: The system must display "feature" tags in the designated accent color. 
+- FR7: The system must display "bug" tags in the designated accent color. 
+- FR8: The system must display a small icon in the corner of each card.
+- FR9: The each task card must display the task assignee's initials prominently.
+- FR10: The system must allow users to assign a task to a user. 
+- FR11: The system must allow users to reassign tasks to another teammate. 
+- FR12: Task cards must automatically display time-based colour states based on their due date. 
+- FR13: Task cards must display a designated "calm" colour if the there are more than 2 days before the due date. 
+- FR14: Task cards must display a designated "warning" colour if it is due in less than 24 hours. 
+- FR15: Task cards must display a designated "alarm" colour if it is past due. 
+- FR16: Task cards must display a designated "neutral" colour if it is done. 
+- FR17: When editing a task, the system shall provide a "Context" section containing a markdown text editor for user input. 
+- FR18: The "Context" section must include an optional "AI" tool dropdown, allowing users to select the AI tool behind the context input.
+- FR19: The system must allow users to copy input from the "Context" section.
+- FR20: The system must have a "Deliverable Anchor" board.
+
+## Non-Functional Requirements
+
+NFR1: Performance 
+The system must display task movements between columns on the Kanban board in under 500 milliseconds.
+NFR2: Scalability
+The system must store up to 65,000 characters per context field without truncation. 
+NFR3: Usability 
+The system must constrain context fields inside a scrollable container with a maximum height of 50vh.
+NFR4: Usability 
+The system must ensure that any task status indicated by colour is accompanied by explicit text by default. 
 
 ## 1. Problem
 
