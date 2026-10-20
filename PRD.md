@@ -8,21 +8,14 @@
 - FR3: The system must allow users to edit a task via modal.
 - FR4: The system must allow users to delete a task via modal. 
 - FR5: The system must display tasks inside columns on a Kanban board 
-- FR6: The system must display "feature" tags in the designated accent color. 
-- FR7: The system must display "bug" tags in the designated accent color. 
-- FR8: The system must display a small icon in the corner of each card.
-- FR9: The each task card must display the task assignee's initials prominently.
-- FR10: The system must allow users to assign a task to a user. 
-- FR11: The system must allow users to reassign tasks to another teammate. 
-- FR12: Task cards must automatically display time-based colour states based on their due date. 
-- FR13: Task cards must display a designated "calm" colour if the there are more than 2 days before the due date. 
-- FR14: Task cards must display a designated "warning" colour if it is due in less than 24 hours. 
-- FR15: Task cards must display a designated "alarm" colour if it is past due. 
-- FR16: Task cards must display a designated "neutral" colour if it is done. 
-- FR17: When editing a task, the system shall provide a "Context" section containing a markdown text editor for user input. 
-- FR18: The "Context" section must include an optional "AI" tool dropdown, allowing users to select the AI tool behind the context input.
-- FR19: The system must allow users to copy input from the "Context" section.
-- FR20: The system must have a "Deliverable Anchor" board.
+- FR6: The system must visually differentiate task cards based on whether they are tagged "feature" or "bug". 
+- FR7: The each task card must display the task assignee's initials prominently.
+- FR8: The system must allow users to assign tasks to a specific team member. 
+- FR9: The system must allow users to reassign tasks to a specific team member. 
+- FR10: Task cards must automatically update their colours based on their due date. 
+- FR11: When editing a task, the system shall provide a "Context" section containing a markdown text editor for user input. 
+- FR12: The "Context" section must include an optional "AI" tool dropdown, allowing users to select the AI tool used.
+- FR13: The system must allow users to copy input from the "Context" section.
 
 ## Non-Functional Requirements
 
