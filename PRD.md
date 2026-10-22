@@ -3,30 +3,45 @@
 **Status:** Hackathon starter PRD · review and fill in the **`<TODO>`** sections before you tag `prd-done`.
 ---
 ## Functional Requirements
-- FR1: The system must allow users to create a new task card.
-- FR2: The system must ensure task card consist of a title, description, type (feature/bug), status, assignee, due date and created date. 
-- FR3: The system must allow users to edit a task via modal.
-- FR4: The system must allow users to delete a task via modal. 
-- FR5: The system must display tasks inside columns on a Kanban board 
-- FR6: The system must visually differentiate task cards based on whether they are tagged "feature" or "bug". 
-- FR7: The each task card must display the task assignee's initials prominently.
-- FR8: The system must allow users to assign tasks to a specific team member. 
+- FR1: The system must allow users to create a new task card. (MVP)  
+- FR2: The system must ensure a task card consists of a title, description, type (feature/bug), status, assignee, due date, created date, context text, context tool used and a timestamp for updating the context. (MVP)
+- FR3: The system must allow users to edit an existing task’s details. (MVP)
+- FR4: The system must allow users to delete a task. (MVP)
+- FR5: The system must display tasks on a Kanban board consisting of four columns (To do, In Progress, Review, Done). (MVP)
+- FR6: The system must visually distinguish task cards based on whether they are tagged ‘feature’ or ‘bug’ with a designated colour and icon. 
+- FR7: Each task card must display the task assignee's initials prominently.
+- FR8: The system must allow users to assign tasks to a specific team member through a dropdown menu. 
 - FR9: The system must allow users to reassign tasks to a specific team member. 
 - FR10: Task cards must automatically update their colours based on their due date. 
-- FR11: When editing a task, the system shall provide a "Context" section containing a markdown text editor for user input. 
-- FR12: The "Context" section must include an optional "AI" tool dropdown, allowing users to select the AI tool used.
-- FR13: The system must allow users to copy input from the "Context" section.
+- FR11: When editing a task, the system shall provide a ‘Context’ section containing a markdown text editor for user input. (MVP)
+- FR12: The ‘Context’ section must include an optional context tool dropdown menu, allowing users to select the AI tool used.
+- FR13: The system must save and display a timestamp next to the context field whenever it is edited.
+- FR14: The system must pre-fill the context text field with a placeholder template when a new task is created.
+- FR15: The system must have a ‘Copy context’ button allowing users to copy a task’s title, description and context input to their clipboard. (MVP)
+- FR16: The system must persist all task and board data to localStorage. (MVP)
+- FR17: The system must display four deliverable cards (Presentation, Demo, Report, Documentation) above the Kanban board.
+- FR18: The system must allow users to input and save URLs for each deliverable card. 
+- FR19: The system must visually indicate the status of a deliverable card depending on if a link is present. 
 
-## Non-Functional Requirements
 
-NFR1: Performance 
-The system must display task movements between columns on the Kanban board in under 500 milliseconds.
-NFR2: Scalability
-The system must store up to 65,000 characters per context field without truncation. 
-NFR3: Usability 
-The system must constrain context fields inside a scrollable container with a maximum height of 50vh.
-NFR4: Usability 
-The system must ensure that any task status indicated by colour is accompanied by explicit text by default. 
+## Non-Functional Requirements  
+
+- NFR1: Scalability (MVP)
+The system must store up to 65,000 characters per prompt and result field without truncation. 
+
+- NFR2: Usability (MVP)
+The system must constrain the text field inputs of up to 65,000 characters without breaking the layout.
+
+- NFR3: Usability (MVP)
+The system must ensure that any task status indicated by colour is accompanied by explicit text by default.  
+
+- NFR4: Performance
+The system must display task updates on the Kanban board in under 500 milliseconds.
+
+## Data Requirements  
+- DR1: Task (MVP)
+- DR2: User (MVP)
+- DR3: Deliverable Anchor(MVP)  
 
 ## 1. Problem
 
