@@ -1,4 +1,4 @@
-# Vibecoding Project Tracker — PRD
+# Vibecoding Project Tracker — PRD 
 
 **Status:** Hackathon starter PRD · review and fill in the **`<TODO>`** sections before you tag `prd-done`.
 ---
