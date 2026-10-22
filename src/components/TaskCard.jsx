@@ -1,5 +1,6 @@
 import TypeBadge, { typeStyle } from './TypeBadge.jsx';
 import DueLabel, { DUE_STATES, dueState } from './DueLabel.jsx';
+import CopyContextButton from './CopyContextButton.jsx';
 
 /** 'Sam Patel' -> 'SP'. Falls back to '?' for unassigned tasks. */
 export const initials = (name) =>
@@ -27,14 +28,15 @@ export function Avatar({ name, size = 'md' }) {
 }
 
 /**
- * One task on the board. The whole card is one button that opens the edit
- * modal, where the Owner field does the handoff (M7.1), so each card is a single Tab stop
- * and a large click target.
+ * One task on the board. The card's main button opens the edit modal, where
+ * the Owner field does the handoff (M7.1); its ::after layer stretches over
+ * the whole card, so the card is still one large click target. "Copy context"
+ * (M10) sits above that layer as the card's second Tab stop.
  * Read order follows importance: title, when it's due, then a meta row (type, owner).
  * The left stripe and badge show feature vs. bug (M6); the card's background
  * tint shows the due state (M8), so the two never compete for the same channel.
  */
-export default function TaskCard({ task, today, highlighted, onOpen }) {
+export default function TaskCard({ task, today, statusLabel, highlighted, onOpen, onCopied }) {
   const state = dueState(task, today);
   const tint = state ? DUE_STATES[state].tint : 'bg-surface-card';
   // Open cards are white and lifted; done cards sit flat in the column's grey,
@@ -42,13 +44,15 @@ export default function TaskCard({ task, today, highlighted, onOpen }) {
   const depth = state === 'done' ? '' : 'shadow-sm hover:shadow-md';
 
   return (
-    <li>
+    <li
+      className={`relative rounded-lg border border-l-4 border-slate-200 ${typeStyle(task.type).stripe} ${tint} ${depth} p-4 transition-shadow duration-200 motion-reduce:transition-none ${
+        highlighted ? 'ring-2 ring-brand-primary' : ''
+      }`}
+    >
       <button
         type="button"
         onClick={() => onOpen(task)}
-        className={`block w-full rounded-lg border border-l-4 border-slate-200 ${typeStyle(task.type).stripe} ${tint} ${depth} p-4 text-left transition-shadow duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 motion-reduce:transition-none ${
-          highlighted ? 'ring-2 ring-brand-primary' : ''
-        }`}
+        className="block w-full text-left after:absolute after:inset-0 after:rounded-lg focus:outline-none focus-visible:after:ring-2 focus-visible:after:ring-brand-primary focus-visible:after:ring-offset-2"
       >
         <span className="block text-[15px] font-medium leading-snug text-text-primary">{task.title}</span>
 
@@ -69,6 +73,14 @@ export default function TaskCard({ task, today, highlighted, onOpen }) {
           </span>
         </span>
       </button>
+
+      <CopyContextButton
+        task={task}
+        statusLabel={statusLabel}
+        onCopied={onCopied}
+        quiet
+        className="relative z-[1] -mb-2 -ml-3 mt-2"
+      />
     </li>
   );
 }

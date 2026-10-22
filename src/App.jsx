@@ -19,7 +19,7 @@ import { SEED_TASKS } from './data/seed.js';
  *   - M7  task-owner    : assignee badge + "Hand off to..." (the Owner field in the modal since M7.1).
  *   - M8  due-tint      : color cards by due date (uses DESIGN.md §2 due-state colors).
  *   - M9  context       : a curated Context briefing field on the modal.
- *   - M10 copy-prompt   : a "Copy as Prompt Context" button that serializes the task + context.
+ *   - M10 copy-context  : a "Copy context" button on each card and in the modal (CopyContextButton.jsx).
  *   - M11 anchors       : the Anchor Board above the Kanban.
  *   - M12 secret-sauce  : the one open-ended thing that makes your tracker yours.
  *
@@ -36,6 +36,9 @@ import { SEED_TASKS } from './data/seed.js';
  * @property {string} assignee
  * @property {string|null} dueDate     ISO 'YYYY-MM-DD'
  * @property {string} createdDate      ISO 'YYYY-MM-DD'
+ * @property {string} [context]        M9: Markdown briefing for whoever picks it up next
+ * @property {string} [contextTool]    M9: AI tool the context came from, '' if none
+ * @property {string|null} [contextUpdatedAt]  M9: ISO date-time of the last context change
  */
 
 // The four columns of the board, in render order.
@@ -122,10 +125,16 @@ export default function App() {
   const closeModal = useCallback(() => setEditing(null), []);
 
   const saveTask = (fields) => {
+    // M9: stamp the context only when it, or its AI tool, actually changed.
+    const before = editing === 'new' ? {} : editing;
+    const contextChanged =
+      fields.context !== (before.context ?? '') || fields.contextTool !== (before.contextTool ?? '');
+    const contextUpdatedAt = contextChanged ? new Date().toISOString() : before.contextUpdatedAt ?? null;
+
     if (editing === 'new') {
-      setTasks([...tasks, { ...fields, id: newId(), createdDate: todayISO() }]);
+      setTasks([...tasks, { ...fields, contextUpdatedAt, id: newId(), createdDate: todayISO() }]);
     } else {
-      setTasks(tasks.map((task) => (task.id === editing.id ? { ...task, ...fields } : task)));
+      setTasks(tasks.map((task) => (task.id === editing.id ? { ...task, ...fields, contextUpdatedAt } : task)));
       if (fields.assignee !== editing.assignee) acknowledgeHandOff(editing.id, fields.assignee);
     }
     setEditing(null);
@@ -141,10 +150,8 @@ export default function App() {
   const [highlightId, setHighlightId] = useState(null);
   const timers = useRef([]);
 
-  // Saving with a new Owner is a handoff (M7.1): ring the card and show a toast.
-  function acknowledgeHandOff(id, name) {
-    setHighlightId(id);
-    setToast({ message: `Handed off to ${name}. Their context is ready.`, visible: true });
+  function showToast(message) {
+    setToast({ message, visible: true });
     timers.current.forEach(clearTimeout);
     timers.current = [
       setTimeout(() => setHighlightId(null), 1500),
@@ -152,6 +159,20 @@ export default function App() {
       setTimeout(() => setToast({ message: '', visible: false }), 3200),
     ];
   }
+
+  // Saving with a new Owner is a handoff (M7.1): ring the card and show a toast.
+  function acknowledgeHandOff(id, name) {
+    setHighlightId(id);
+    showToast(`Handed off to ${name}. Their context is ready.`);
+  }
+
+  // M10: the brief's wording, plus the next step. Says so when there's no context
+  // yet, and if the browser blocks the clipboard, says what to do instead.
+  const acknowledgeCopy = useCallback((ok, hasContext) => {
+    if (!ok) showToast('Couldn’t copy. Use “See what gets copied” in the task instead.');
+    else if (!hasContext) showToast('Copied, but this task has no context yet.');
+    else showToast('Copied to clipboard! Paste it into any AI tool to carry on.');
+  }, []);
 
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
 
@@ -206,6 +227,7 @@ export default function App() {
           today={today}
           highlightId={highlightId}
           onOpenTask={setEditing}
+          onCopied={acknowledgeCopy}
         />
       </div>
 
@@ -217,6 +239,7 @@ export default function App() {
           onSave={saveTask}
           onDelete={deleteTask}
           onClose={closeModal}
+          onCopied={acknowledgeCopy}
         />
       )}
 

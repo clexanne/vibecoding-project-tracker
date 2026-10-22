@@ -6,7 +6,7 @@ import TaskCard from './TaskCard.jsx';
  * Columns share one height and a minimum body height, so the four stages
  * read as one row even when some are empty.
  */
-export default function Board({ stages, tasks, today, highlightId, onOpenTask }) {
+export default function Board({ stages, tasks, today, highlightId, onOpenTask, onCopied }) {
   return (
     <main id="board" tabIndex={-1} aria-label="Task board" className="grid grid-cols-1 gap-6 focus:outline-none sm:grid-cols-2 xl:grid-cols-4">
       {stages.map((stage) => {
@@ -37,8 +37,10 @@ export default function Board({ stages, tasks, today, highlightId, onOpenTask })
                     key={task.id}
                     task={task}
                     today={today}
+                    statusLabel={stage.label}
                     highlighted={task.id === highlightId}
                     onOpen={onOpenTask}
+                    onCopied={onCopied}
                   />
                 ))}
               </ul>
