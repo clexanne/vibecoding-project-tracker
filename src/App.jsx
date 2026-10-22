@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import {useState, useEffect, useCallback} from 'react';
 import Board from './components/Board.jsx';
-import { SEED_TASKS } from './data/seed.js';
+import TaskModal from './components/TaskModal.jsx';
+import {SEED_TASKS} from './data/seed.js';
 
 /**
  * Vibecoding Project Tracker — starter scaffold.
@@ -38,21 +39,30 @@ import { SEED_TASKS } from './data/seed.js';
 // The four columns of the board, in render order.
 // Use these IDs everywhere — do not invent new ones.
 export const STAGES = [
-  { id: 'todo',        label: 'To Do' },
-  { id: 'in-progress', label: 'In Progress' },
-  { id: 'review',      label: 'Review' },
-  { id: 'done',        label: 'Done' },
+    {id: 'todo', label: 'To Do'},
+    {id: 'in-progress', label: 'In Progress'},
+    {id: 'review', label: 'Review'},
+    {id: 'done', label: 'Done'},
 ];
 
 // Mock team members (PRD §8 / DR2). `Task.assignee` stores a member's full name,
 // so fullName(member) gives the only valid values for `Task.assignee`.
 export const TEAM = [
-  { id: 'u1', firstName: 'Alex',   lastName: 'Morgan', email: 'alex.morgan@example.com' },
-  { id: 'u2', firstName: 'Sam',    lastName: 'Patel',  email: 'sam.patel@example.com' },
-  { id: 'u3', firstName: 'Jordan', lastName: 'Lee',    email: 'jordan.lee@example.com' },
+    {id: 'u1', firstName: 'Alex', lastName: 'Morgan', email: 'alex.morgan@example.com'},
+    {id: 'u2', firstName: 'Sam', lastName: 'Patel', email: 'sam.patel@example.com'},
+    {id: 'u3', firstName: 'Jordan', lastName: 'Lee', email: 'jordan.lee@example.com'},
 ];
 
 export const fullName = (member) => `${member.firstName} ${member.lastName}`;
+
+// Today as 'YYYY-MM-DD' in local time (toISOString would give the UTC date).
+const todayISO = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
+// Unique string id; falls back to a timestamp where crypto.randomUUID is unavailable.
+const newId = () => globalThis.crypto?.randomUUID?.() ?? `task-${Date.now()}`;
 
 /**
  * A tiny localStorage hook — survives reloads, no library needed.
@@ -61,56 +71,84 @@ export const fullName = (member) => `${member.firstName} ${member.lastName}`;
  *   const [tasks, setTasks] = useLocalStorage('vibetracker.tasks', []);
  */
 export function useLocalStorage(key, initialValue) {
-  const [value, setValue] = useState(() => {
-    try {
-      const raw = window.localStorage.getItem(key);
-      return raw != null ? JSON.parse(raw) : initialValue;
-    } catch {
-      return initialValue;
-    }
-  });
+    const [value, setValue] = useState(() => {
+        try {
+            const raw = window.localStorage.getItem(key);
+            return raw != null ? JSON.parse(raw) : initialValue;
+        } catch {
+            return initialValue;
+        }
+    });
 
-  useEffect(() => {
-    try {
-      window.localStorage.setItem(key, JSON.stringify(value));
-    } catch {
-      /* quota or private-mode error — silently ignore for hackathon */
-    }
-  }, [key, value]);
+    useEffect(() => {
+        try {
+            window.localStorage.setItem(key, JSON.stringify(value));
+        } catch {
+            /* quota or private-mode error — silently ignore for hackathon */
+        }
+    }, [key, value]);
 
-  return [value, setValue];
+    return [value, setValue];
 }
 
 export default function App() {
-  const [tasks, setTasks] = useLocalStorage('vibetracker.tasks', SEED_TASKS);
+    const [tasks, setTasks] = useLocalStorage('vibetracker.tasks', SEED_TASKS);
 
-  // TODO M5 crud-modal:
-  //   const [editing, setEditing] = useState(null);
-  //
-  // TODO M11 anchors:
-  //   const [anchors, setAnchors] = useLocalStorage('vibetracker.anchors', [...]);
+    // null = modal closed, 'new' = creating, otherwise the task being edited.
+    const [editing, setEditing] = useState(null);
+    const closeModal = useCallback(() => setEditing(null), []);
 
-  return (
-    <div className="min-h-screen bg-surface-page p-6">
-      <header className="mb-6 flex items-end justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-brand-primary">
-            Vibecoding Project Tracker
-          </h1>
-          <p className="text-sm text-text-muted">
-            Every task, and the prompt behind it, in one place.
-          </p>
+    const saveTask = (fields) => {
+        if (editing === 'new') {
+            setTasks([...tasks, {...fields, id: newId(), createdDate: todayISO()}]);
+        } else {
+            setTasks(tasks.map((task) => (task.id === editing.id ? {...task, ...fields} : task)));
+        }
+        setEditing(null);
+    };
+
+    const deleteTask = (id) => {
+        setTasks(tasks.filter((task) => task.id !== id));
+        setEditing(null);
+    };
+
+    // TODO M11 anchors:
+    //   const [anchors, setAnchors] = useLocalStorage('vibetracker.anchors', [...]);
+
+    return (
+        <div className="min-h-screen bg-surface-page p-6">
+            <header className="mb-6 flex items-end justify-between">
+                <div>
+                    <h1 className="text-2xl font-semibold text-brand-primary">
+                        Vibecoding Project Tracker
+                    </h1>
+                    <p className="text-sm text-text-muted">
+                        Every task, and the prompt behind it, in one place.
+                    </p>
+                </div>
+                <button
+                    type="button"
+                    onClick={() => setEditing('new')}
+                    className="min-h-10 rounded-md bg-brand-primary px-4 text-sm font-medium text-white hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2"
+                >
+                    + New task
+                </button>
+            </header>
+
+            {/* TODO M11 anchors: render the Anchor Board (Presentation / Demo / Report / Documentation) above the board. */}
+
+            <Board stages={STAGES} tasks={tasks} onOpenTask={setEditing}/>
+
+            {editing && (
+                <TaskModal
+                    task={editing === 'new' ? null : editing}
+                    stages={STAGES}
+                    members={TEAM.map(fullName)}
+                    onSave={saveTask}
+                    onDelete={deleteTask}
+                    onClose={closeModal}
+                />
+            )}
         </div>
-      </header>
-
-      {/* TODO M11 anchors: render the Anchor Board (Presentation / Demo / Report / Documentation) above the board. */}
-
-      {/*
-        TODO M5 crud-modal:
-          Add a "+" button that opens a modal with every Task field.
-          Clicking a card should open the same modal in edit mode.
-      */}
-      <Board stages={STAGES} tasks={tasks} />
-    </div>
-  );
+    );
 }
