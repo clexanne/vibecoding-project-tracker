@@ -19,8 +19,8 @@ export default {
         'type-bug-bg': '#FDF4FF',
 
         // DESIGN.md §2 — due-date states (M8 due-tint)
-        'due-safe': '#1D4ED8',
-        'due-safe-bg': '#EFF6FF',
+        'due-safe': '#475569',
+        'due-safe-bg': '#FFFFFF',
         'due-warning': '#B45309',
         'due-warning-bg': '#FFFBEB',
         'due-overdue': '#B91C1C',

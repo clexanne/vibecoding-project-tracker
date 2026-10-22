@@ -3,7 +3,7 @@ import { Trash2 } from 'lucide-react';
 import TypeBadge, { TASK_TYPES, typeStyle } from './TypeBadge.jsx';
 
 const inputClass =
-  'mt-1.5 min-h-11 w-full rounded-md border border-slate-300 bg-surface-card px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-brand-primary';
+  'mt-1.5 min-h-11 w-full rounded-md border border-slate-500 bg-surface-card px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-brand-primary';
 const labelClass = 'block text-sm font-medium text-text-primary';
 
 /**
@@ -112,7 +112,7 @@ export default function TaskModal({ task, stages, members, onSave, onDelete, onC
                   <label
                     key={id}
                     className={`flex min-h-11 flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-md border px-3 text-sm font-medium focus-within:ring-2 focus-within:ring-brand-primary ${
-                      form.type === id ? `border-current bg-brand-accent ${text}` : 'border-slate-300 text-text-muted'
+                      form.type === id ? `border-current bg-brand-accent ${text}` : 'border-slate-500 text-text-muted'
                     }`}
                   >
                     <input

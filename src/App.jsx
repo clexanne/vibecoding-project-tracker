@@ -63,6 +63,26 @@ const todayISO = () => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
 
+/**
+ * Today's date that keeps itself current (M8): rechecks every minute and when
+ * the tab comes back into view, so due tints change at midnight on their own.
+ */
+function useToday() {
+  const [today, setToday] = useState(todayISO);
+  useEffect(() => {
+    const refresh = () => setToday(todayISO());
+    const timer = setInterval(refresh, 60_000);
+    document.addEventListener('visibilitychange', refresh);
+    window.addEventListener('focus', refresh);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener('visibilitychange', refresh);
+      window.removeEventListener('focus', refresh);
+    };
+  }, []);
+  return today;
+}
+
 // Unique string id; falls back to a timestamp where crypto.randomUUID is unavailable.
 const newId = () => globalThis.crypto?.randomUUID?.() ?? `task-${Date.now()}`;
 
@@ -95,6 +115,7 @@ export function useLocalStorage(key, initialValue) {
 
 export default function App() {
   const [tasks, setTasks] = useLocalStorage('vibetracker.tasks', SEED_TASKS);
+  const today = useToday();
 
   // null = modal closed, 'new' = creating, otherwise the task being edited.
   const [editing, setEditing] = useState(null);
@@ -182,6 +203,7 @@ export default function App() {
         <Board
           stages={STAGES}
           tasks={tasks}
+          today={today}
           highlightId={highlightId}
           onOpenTask={setEditing}
         />

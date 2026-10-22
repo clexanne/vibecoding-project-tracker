@@ -12,17 +12,17 @@
 
 One sentence that captures the feeling the tracker should leave you with.
 
-`<TODO>`
+Calm and focused, like a tidy desk at 11pm: quiet neutrals, one confident indigo, and colour used only where it means something.
 
 Two or three references that capture the vibe (links to dribbble shots, screenshots of apps you admire, Pinterest boards — anything visual):
 
-- `<TODO>`
-- `<TODO>`
-- `<TODO>`
+- Linear's board view: restrained neutrals, strong type hierarchy.
+- GitHub Projects: dense but readable cards with small status labels.
+- Things 3: generous whitespace, nothing shouts.
 
 Anti-references — what we are explicitly **not** trying to look like:
 
-- `<TODO>`
+- Trello-style saturated rainbow cards where every colour fights for attention.
 
 ## 2. Color palette
 
@@ -43,16 +43,17 @@ These are the colors the build milestones will reference. Once chosen, paste the
 
 | Token | Hex | When used |
 |---|---|---|
-| `type-feature` | `#0F766E` (5.5:1 on white; always with icon + "Feature" label) | Cards tagged `feature` (accent stripe + icon) |
-| `type-bug` | `#A21CAF` (6.3:1 on white; always with icon + "Bug" label) | Cards tagged `bug` (accent stripe + icon) |
+| `type-feature` | `#0F766E` (5.5:1 on white; always with icon + "Feature" label in a pill, tint `type-feature-bg` `#F0FDFA`, 5.3:1) | Cards tagged `feature` (accent stripe + icon) |
+| `type-bug` | `#A21CAF` (6.3:1 on white; always with icon + "Bug" label in a pill, tint `type-bug-bg` `#FDF4FF`, 5.9:1) | Cards tagged `bug` (accent stripe + icon) |
+
 ### Due-date states (M8 `due-tint`)
 
 | Token | Hex | When used |
 |---|---|---|
-| `due-safe` | `#1D4ED8` blue, card tint `due-safe-bg` `#EFF6FF` (6.2:1) | More than 2 days out |
+| `due-safe` | `#475569` slate, no tint (`due-safe-bg` `#FFFFFF`, 7.6:1); upcoming is the normal case so it stays quiet, and blue sat too close to the indigo brand | More than 2 days out |
 | `due-warning` | `#B45309` amber, card tint `due-warning-bg` `#FFFBEB` (4.8:1; pure yellow fails contrast) | Less than 24 hours |
 | `due-overdue` | `#B91C1C` red, card tint `due-overdue-bg` `#FEF2F2` (5.9:1) | Past due |
-| `due-neutral` | `#475569` grey, card tint `due-neutral-bg` `#F1F5F9` (6.9:1) | Done (overrides date) |
+| `due-neutral` | `#475569` grey, card tint `due-neutral-bg` `#F1F5F9` (6.9:1), the same grey as the column with no shadow, so done cards sit back | Done (overrides date) |
 
 ## 3. Typography
 
@@ -84,7 +85,6 @@ One short sentence per element. These set the tone for the build phase — Perso
 
 Three lines of microcopy that capture the tone of the product. Keep it short — these are the words a stressed user reads at 11pm.
 
-
 | Where | Text |
 |---|---|
 | "+" button label | + New task |
@@ -97,8 +97,8 @@ Three lines of microcopy that capture the tone of the product. Keep it short —
 
 The tracker probably doesn't need a logo, but it does need a name and a wordmark style.
 
-- **Product name:** `<TODO>` (match PRD §11 team identity)
-- **Wordmark style:** `<TODO>` (e.g. "Just the name in the heading font, brand-primary color, no icon.")
+- **Product name:** Vibecoding Project Tracker
+- **Wordmark style:** "Vibecoding Project Tracker" in Inter 600 at 24px in brand-primary, no icon.
 
 ## 7. Out of scope (this hackathon)
 

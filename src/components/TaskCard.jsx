@@ -1,4 +1,5 @@
 import TypeBadge, { typeStyle } from './TypeBadge.jsx';
+import DueLabel, { DUE_STATES, dueState } from './DueLabel.jsx';
 
 /** 'Sam Patel' -> 'SP'. Falls back to '?' for unassigned tasks. */
 export const initials = (name) =>
@@ -29,20 +30,33 @@ export function Avatar({ name, size = 'md' }) {
  * One task on the board. The whole card is one button that opens the edit
  * modal, where the Owner field does the handoff (M7.1), so each card is a single Tab stop
  * and a large click target.
- * Read order follows importance: title first, then a meta row (type, owner).
- * The left stripe and badge show feature vs. bug (M6). Due tint (M8) comes later.
+ * Read order follows importance: title, when it's due, then a meta row (type, owner).
+ * The left stripe and badge show feature vs. bug (M6); the card's background
+ * tint shows the due state (M8), so the two never compete for the same channel.
  */
-export default function TaskCard({ task, highlighted, onOpen }) {
+export default function TaskCard({ task, today, highlighted, onOpen }) {
+  const state = dueState(task, today);
+  const tint = state ? DUE_STATES[state].tint : 'bg-surface-card';
+  // Open cards are white and lifted; done cards sit flat in the column's grey,
+  // so finished work recedes and the eye goes to what's left.
+  const depth = state === 'done' ? '' : 'shadow-sm hover:shadow-md';
+
   return (
     <li>
       <button
         type="button"
         onClick={() => onOpen(task)}
-        className={`block w-full rounded-lg border border-l-4 border-slate-200 ${typeStyle(task.type).stripe} bg-surface-card p-4 text-left transition-shadow duration-200 hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 motion-reduce:transition-none ${
+        className={`block w-full rounded-lg border border-l-4 border-slate-200 ${typeStyle(task.type).stripe} ${tint} ${depth} p-4 text-left transition-shadow duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 motion-reduce:transition-none ${
           highlighted ? 'ring-2 ring-brand-primary' : ''
         }`}
       >
         <span className="block text-[15px] font-medium leading-snug text-text-primary">{task.title}</span>
+
+        {state && (
+          <span className="mt-2 block">
+            <DueLabel task={task} today={today} />
+          </span>
+        )}
 
         <span className="mt-4 flex items-center justify-between gap-3">
           <TypeBadge type={task.type} />
