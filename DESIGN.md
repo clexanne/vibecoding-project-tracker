@@ -32,36 +32,35 @@ These are the colors the build milestones will reference. Once chosen, paste the
 
 | Token | Hex | Where it shows up |
 |---|---|---|
-| `brand-primary` | `<TODO>` | Header, "+" button, focus rings |
-| `brand-accent` | `<TODO>` | Highlights, hover states, links |
-| `surface-page` | `<TODO>` | Page background |
-| `surface-card` | `<TODO>` | Card background |
-| `text-primary` | `<TODO>` | Body text |
-| `text-muted` | `<TODO>` | Captions, dates, counts |
+| `brand-primary` | `#4338CA` (white text on it 7.9:1) | Header, "+" button, focus rings |
+| `brand-accent` | `#EEF2FF` (text-primary on it 16:1) | Highlights, hover states, links |
+| `surface-page` | `#F8FAFC` | Page background |
+| `surface-card` | `#FFFFFF` | Card background |
+| `text-primary` | `#0F172A` (17:1 on page) | Body text |
+| `text-muted` | `#475569` (7.2:1 on page, 6.9:1 on every due tint) | Captions, dates, counts |
 
 ### Task type (M6 `tag-style`)
 
 | Token | Hex | When used |
 |---|---|---|
-| `type-feature` | `<TODO>` | Cards tagged `feature` (accent stripe + icon) |
-| `type-bug` | `<TODO>` | Cards tagged `bug` (accent stripe + icon) |
-
+| `type-feature` | `#0F766E` (5.5:1 on white; always with icon + "Feature" label) | Cards tagged `feature` (accent stripe + icon) |
+| `type-bug` | `#A21CAF` (6.3:1 on white; always with icon + "Bug" label) | Cards tagged `bug` (accent stripe + icon) |
 ### Due-date states (M8 `due-tint`)
 
 | Token | Hex | When used |
 |---|---|---|
-| `due-safe` | `<TODO>` | More than 2 days out |
-| `due-warning` | `<TODO>` | Less than 24 hours |
-| `due-overdue` | `<TODO>` | Past due |
-| `due-neutral` | `<TODO>` | Done (overrides date) |
+| `due-safe` | `#1D4ED8` blue, card tint `due-safe-bg` `#EFF6FF` (6.2:1) | More than 2 days out |
+| `due-warning` | `#B45309` amber, card tint `due-warning-bg` `#FFFBEB` (4.8:1; pure yellow fails contrast) | Less than 24 hours |
+| `due-overdue` | `#B91C1C` red, card tint `due-overdue-bg` `#FEF2F2` (5.9:1) | Past due |
+| `due-neutral` | `#475569` grey, card tint `due-neutral-bg` `#F1F5F9` (6.9:1) | Done (overrides date) |
 
 ## 3. Typography
 
 | Role | Font | Why |
 |---|---|---|
-| Heading | `<TODO>` | `<TODO one sentence>` |
-| Body | `<TODO>` | `<TODO one sentence>` |
-| Monospace (tags, badges, code) | `<TODO>` | `<TODO one sentence>` |
+| Heading | Inter (600) | Clear letterforms at small sizes and a calm, neutral voice. |
+| Body | Inter (400 / 500) | One family keeps the page quiet, and its tall x-height stays readable at 14px. |
+| Monospace (tags, badges, code) | JetBrains Mono | Easy to tell 0/O and 1/l apart in pasted prompts and logs. |
 
 Suggested sizes (override only if the design demands it):
 
@@ -75,23 +74,24 @@ Suggested sizes (override only if the design demands it):
 
 One short sentence per element. These set the tone for the build phase — Person A's modal and Person B's anchor board should both feel like they came from this doc.
 
-- **Cards:** `<TODO>` (e.g. "Light, almost weightless; the only weight is from a 1px border, no shadow except on hover.")
-- **Buttons:** `<TODO>` (e.g. "Solid fill, no gradient, generous padding, rounded-md.")
-- **Modal:** `<TODO>` (e.g. "Centered, max-width-md, slate-900 backdrop at 50% opacity.")
-- **Empty states:** `<TODO>` (e.g. "Dashed border, muted text, never sad.")
-- **Drag affordance (if used):** `<TODO>` (e.g. "None — we use a status dropdown.")
+- **Cards:** White with a 1px slate-200 border, a 4px left stripe in the type colour plus an icon and word, and the due tint behind; the whole card is a focusable button.
+- **Buttons:** Solid brand-primary with white text, rounded-md, at least 40px tall, with a visible 2px brand-primary focus ring.
+- **Modal:** Centered, max-width-lg, slate-900 backdrop at 50%, role="dialog" with labelled fields, Escape closes it and focus returns to the card.
+- **Empty states:** Dashed slate-300 border, muted text, never sad.
+- **Drag affordance (if used):** None for now; we use a status dropdown, which stays as the keyboard-friendly option even if drag arrives in M12.
 
 ## 5. Voice / microcopy
 
 Three lines of microcopy that capture the tone of the product. Keep it short — these are the words a stressed user reads at 11pm.
 
+
 | Where | Text |
 |---|---|
-| "+" button label | `<TODO>` (e.g. "+ Task" or "Add task" or "New") |
-| Empty column placeholder | `<TODO>` (e.g. "Nothing here yet — keep going.") |
-| Toast after "Copy as Prompt Context" | `<TODO>` (e.g. "Copied. Now paste it into the AI.") |
-| Confirm-delete message | `<TODO>` (e.g. "Delete this task? You can't undo.") |
-| Handoff toast (M7 `task-owner`) | `<TODO>` (e.g. "Handed off to {name}. They've got it.") |
+| "+" button label | + New task |
+| Empty column placeholder | Nothing here yet. Your next win goes here. |
+| Toast after "Copy as Prompt Context" | Copied. Paste it into your AI and pick up where you left off. |
+| Confirm-delete message | Delete "{title}"? This can't be undone. |
+| Handoff toast (M7 `task-owner`) | Handed off to {name}. Their context is ready. |
 
 ## 6. Logo / wordmark
 
