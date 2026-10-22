@@ -1,9 +1,5 @@
 import {useEffect, useRef, useState} from 'react';
-
-const TYPES = [
-    {id: 'feature', label: 'Feature'},
-    {id: 'bug', label: 'Bug'},
-];
+import TypeBadge, {TASK_TYPES, typeStyle} from './TypeBadge.jsx';
 
 const inputClass =
     'mt-1 w-full rounded-md border border-slate-300 bg-surface-card px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-brand-primary';
@@ -61,12 +57,15 @@ export default function TaskModal({task, stages, members, onSave, onDelete, onCl
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="task-modal-title"
-                className="w-full max-w-lg rounded-lg bg-surface-card p-6 shadow-xl"
+                className={`w-full max-w-lg rounded-lg border-l-4 ${typeStyle(form.type).stripe} bg-surface-card p-6 shadow-xl`}
             >
                 <div className="mb-4 flex items-center justify-between">
-                    <h2 id="task-modal-title" className="text-lg font-semibold text-text-primary">
-                        {isEditing ? 'Edit task' : 'New task'}
-                    </h2>
+                    <div className="flex items-center gap-3">
+                        <h2 id="task-modal-title" className="text-lg font-semibold text-text-primary">
+                            {isEditing ? 'Edit task' : 'New task'}
+                        </h2>
+                        <TypeBadge type={form.type}/>
+                    </div>
                     <button
                         type="button"
                         onClick={onClose}
@@ -102,14 +101,30 @@ export default function TaskModal({task, stages, members, onSave, onDelete, onCl
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label htmlFor="task-type" className={labelClass}>Type</label>
-                            <select id="task-type" value={form.type} onChange={update('type')} className={inputClass}>
-                                {TYPES.map((type) => (
-                                    <option key={type.id} value={type.id}>{type.label}</option>
+                        <fieldset>
+                            <legend className={labelClass}>Type</legend>
+                            <div className="mt-1 flex gap-2">
+                                {Object.entries(TASK_TYPES).map(([id, {label, Icon, text}]) => (
+                                    <label
+                                        key={id}
+                                        className={`flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-md border px-3 py-2 text-sm font-medium focus-within:ring-2 focus-within:ring-brand-primary ${
+                                            form.type === id ? `border-current bg-brand-accent ${text}` : 'border-slate-300 text-text-muted'
+                                        }`}
+                                    >
+                                        <input
+                                            type="radio"
+                                            name="task-type"
+                                            value={id}
+                                            checked={form.type === id}
+                                            onChange={update('type')}
+                                            className="sr-only"
+                                        />
+                                        <Icon className="h-4 w-4" aria-hidden="true"/>
+                                        {label}
+                                    </label>
                                 ))}
-                            </select>
-                        </div>
+                            </div>
+                        </fieldset>
 
                         <div>
                             <label htmlFor="task-status" className={labelClass}>Status</label>

@@ -14,7 +14,9 @@ export default {
 
         // DESIGN.md §2 — task type (M6 tag-style)
         'type-feature': '#0F766E',
+        'type-feature-bg': '#F0FDFA',
         'type-bug': '#A21CAF',
+        'type-bug-bg': '#FDF4FF',
 
         // DESIGN.md §2 — due-date states (M8 due-tint)
         'due-safe': '#1D4ED8',
