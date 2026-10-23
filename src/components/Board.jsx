@@ -34,7 +34,7 @@ const readCollapsed = () => {
  * Done can be collapsed: finished work piles up, and folding it gives the three
  * active columns more room on wide screens (on smaller ones it just hides the
  * cards). It still shows its count and still takes dropped cards.
- * My order: dropped on a card, a card lands just above or below it (whichever
+ * Custom order: dropped on a card, a card lands just above or below it (whichever
  * half the pointer is over), shown by an indigo line in the gap. The column
  * only turns indigo when the card is coming from another column, so a
  * reorder shows one cue, not two. Without a mouse, "Up one" / "Down one" in
@@ -130,8 +130,8 @@ export default function Board({ stages, tasks, today, highlightId, onOpenTask, o
                 else if (draggingId) onMove(draggingId, stage.id);
                 endDrag();
               }}
-              className={`flex-col rounded-lg border p-4 sm:flex ${phoneStage === stage.id ? 'flex' : 'hidden'} ${
-                isTarget ? 'border-transparent bg-brand-accent outline-dashed outline-2 -outline-offset-2 outline-brand-primary' : 'border-slate-300 bg-slate-50'
+              className={`flex-col rounded-xl border p-4 sm:flex ${phoneStage === stage.id ? 'flex' : 'hidden'} ${
+                isTarget ? 'border-transparent bg-brand-accent outline-dashed outline-2 -outline-offset-2 outline-brand-primary' : 'border-slate-300 bg-slate-100'
               }`}
             >
               <div className="mb-4 flex items-center gap-2">

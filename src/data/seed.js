@@ -25,7 +25,7 @@ export const SEED_TASKS = [
         description: 'Headline, one-line intro and a "See my work" button for the top of the home page.',
         type: 'feature',
         status: 'todo',
-        assignee: 'Sam Patel',
+        assignee: 'Sara Patel',
         dueDate: daysFromToday(5), // more than 2 days out: calm
         createdDate: daysFromToday(-1),
         context: `## Background
@@ -113,7 +113,7 @@ Shrink \`me.jpg\` under 200 KB, then add the three skills as a list.
         description: 'The two-column CV page overflows below 400px wide, so you have to scroll sideways.',
         type: 'bug',
         status: 'review',
-        assignee: 'Sam Patel',
+        assignee: 'Sara Patel',
         dueDate: daysFromToday(-1), // overdue: alarm
         createdDate: daysFromToday(-4),
         context: `## Background
@@ -168,7 +168,7 @@ Nothing left. Update it if we add a page.
         description: 'One screenshot and a two-line summary for each of the three projects on the Projects page.',
         type: 'feature',
         status: 'todo',
-        assignee: 'Jordan Lee',
+        assignee: 'Maya Chen',
         dueDate: daysFromToday(6),
         createdDate: daysFromToday(0),
         // Just added, so no context yet: shows the card's "No context yet" note.
@@ -210,7 +210,7 @@ Add \`name\` to each input, send a test message, then check the inbox.
         description: 'Every image on the site needs alt text that says what it shows, or empty alt if it is decoration.',
         type: 'feature',
         status: 'review',
-        assignee: 'Jordan Lee',
+        assignee: 'Maya Chen',
         dueDate: daysFromToday(1),
         createdDate: daysFromToday(-3),
         context: `## Background
@@ -238,7 +238,7 @@ Check them with a screen reader, then move to Done.
         description: 'Put the site online on a free Vercel link that anyone can open.',
         type: 'feature',
         status: 'done',
-        assignee: 'Sam Patel',
+        assignee: 'Sara Patel',
         dueDate: daysFromToday(-2),
         createdDate: daysFromToday(-5),
         context: `## Background

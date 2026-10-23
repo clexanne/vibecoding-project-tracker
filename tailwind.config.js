@@ -26,7 +26,7 @@ export default {
         'due-overdue': '#B91C1C',
         'due-overdue-bg': '#FEF2F2',
         'due-neutral': '#475569',
-        'due-neutral-bg': '#F1F5F9',
+        'due-neutral-bg': '#F8FAFC',  // a step lighter than the slate-100 column, so done cards don't vanish
       },
       fontFamily: {
         // DESIGN.md §3

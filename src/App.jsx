@@ -24,7 +24,7 @@ import { SEED_ANCHORS, SEED_TASKS } from './data/seed.js';
  *                         "Copied to clipboard" toast (the stretch goal).
  *   - M11 project-deliverables : AnchorBoard.jsx, pinned above the board.
  *   - M12 secret-sauce  : drag a card to another column, or use its "Move to" menu
- *                         (Board.jsx, TaskCard.jsx), or drag it up or down for "My order";
+ *                         (Board.jsx, TaskCard.jsx), or drag it up or down for "Custom order";
  *                         moves and deletes can be undone
  *                         from the toast; the Done column can be collapsed.
  *   - Extras: BoardToolbar.jsx (owner/type filters, sort), TeamModal.jsx, ConfirmDialog.jsx.
@@ -58,8 +58,9 @@ export const STAGES = [
 // so fullName(member) gives the only valid values for `Task.assignee`.
 export const TEAM = [
   { id: 'u1', firstName: 'Alex',   lastName: 'Morgan', email: 'alex.morgan@example.com' },
-  { id: 'u2', firstName: 'Sam',    lastName: 'Patel',  email: 'sam.patel@example.com' },
+  { id: 'u2', firstName: 'Sara',   lastName: 'Patel',  email: 'sara.patel@example.com' },
   { id: 'u3', firstName: 'Jordan', lastName: 'Lee',    email: 'jordan.lee@example.com' },
+  { id: 'u4', firstName: 'Maya',   lastName: 'Chen',   email: 'maya.chen@example.com' },
 ];
 
 export const fullName = (member) => [member.firstName, member.lastName].filter(Boolean).join(' ');
@@ -172,7 +173,7 @@ export default function App() {
   };
 
   // M12: a card dragged to another column, or moved with its "Move to" menu.
-  // In My order it goes to the bottom of its new column, like a new card would.
+  // In Custom order it goes to the bottom of its new column, like a new card would.
   const moveTask = (id, status) => {
     const index = tasks.findIndex((task) => task.id === id);
     const moved = tasks[index];
@@ -201,7 +202,7 @@ export default function App() {
     });
   };
 
-  // My order: a card dropped at a spot between cards, or nudged with "Up one" /
+  // Custom order: a card dropped at a spot between cards, or nudged with "Up one" /
   // "Down one". The board shows the tasks list in its saved order, so placing a
   // card moves it in that list, just before or after another card. If a sort was
   // on, the list takes that sort's order first, so no other card jumps.
@@ -225,7 +226,7 @@ export default function App() {
     setHighlightId(id);
     if (fromMenu) focusMenu(id);
     const where = from === status ? 'Moved' : `Moved to ${STAGES.find((stage) => stage.id === status).label}:`;
-    const switched = sortBefore === 'manual' ? '' : ' Sorted by My order.';
+    const switched = sortBefore === 'manual' ? '' : ' Sorted by Custom order.';
     showToast(`${where} "${moved.title}".${switched}`, {
       label: 'Undo',
       onClick: () => {
@@ -369,7 +370,7 @@ export default function App() {
             href="/"
             className="inline-flex min-w-min flex-1 items-center gap-3 rounded-md sm:flex-none focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
           >
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-primary forced-color-adjust-none">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-primary forced-color-adjust-none">
               <svg viewBox="0 0 24 24" className="h-7 w-7 fill-white" aria-hidden="true">
                 <rect x="3" y="4" width="5" height="4" rx="1" />
                 <rect x="3" y="10" width="5" height="4" rx="1" />
@@ -379,7 +380,7 @@ export default function App() {
                 <rect x="16" y="4" width="5" height="4" rx="1" />
               </svg>
             </span>
-            <h1 className="text-lg font-semibold leading-tight text-brand-primary sm:text-2xl">
+            <h1 className="text-lg font-bold leading-tight text-brand-primary sm:text-2xl">
               Vibecoding Project Tracker
               <span className="sr-only">, home</span>
             </h1>

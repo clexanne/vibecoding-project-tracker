@@ -48,7 +48,7 @@ function AnchorCard({ id, label, Icon, url, onSave }) {
   };
 
   return (
-    <li className="flex items-center gap-3 rounded-lg border border-slate-200 bg-surface-card p-2 pl-3 max-[359px]:block max-[359px]:p-3 sm:block sm:p-3">
+    <li className="flex items-center gap-3 rounded-xl border border-slate-200 bg-surface-card p-2 pl-3 max-[359px]:block max-[359px]:p-3 sm:block sm:p-3">
       {/* A plain card per deliverable (M11: "four labeled cards"): white on the
           page grey, a light border, no shadow or stripe, so it doesn't look like a
           task card you can open. Name above its field, like the task form, and the
@@ -124,13 +124,20 @@ function AnchorCard({ id, label, Icon, url, onSave }) {
  * board itself still starts above the fold.
  */
 export default function AnchorBoard({ anchors, onSave }) {
+  const linkedCount = DELIVERABLES.filter(({ id }) => anchors[id]).length;
   return (
     <section aria-labelledby="deliverables-heading" className="mb-8 sm:mb-10">
       {/* No hint line: the heading, the four names and "Paste a link" already
           say what to do. Same heading size as the board's columns (same level). */}
-      <h2 id="deliverables-heading" className="mb-3 text-lg font-semibold text-text-primary">
-        Deliverables
-      </h2>
+      {/* The count says how close the project is to handing in, without reading all four. */}
+      <div className="mb-3 flex items-baseline justify-between gap-3">
+        <h2 id="deliverables-heading" className="text-lg font-semibold text-text-primary">
+          Deliverables
+        </h2>
+        <p className="text-sm text-text-muted">
+          <span className="font-semibold text-text-primary">{linkedCount} of {DELIVERABLES.length}</span> linked
+        </p>
+      </div>
       {/* Same gap as the board; four across from 1024px so the board starts higher
           on small laptops, and from 1280px each card sits over a column.
           No line under the section: the cards end it, and the big gap below

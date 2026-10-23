@@ -4,7 +4,7 @@ import TypeBadge, { typeStyle } from './TypeBadge.jsx';
 import DueLabel, { DUE_STATES, dueState } from './DueLabel.jsx';
 import CopyContextButton from './CopyContextButton.jsx';
 
-/** 'Sam Patel' -> 'SP'. Falls back to '?' for unassigned tasks. */
+/** 'Sara Patel' -> 'SP'. Falls back to '?' for unassigned tasks. */
 export const initials = (name) =>
   (name ?? '')
     .split(' ')
@@ -38,9 +38,10 @@ export function Avatar({ name, size = 'md' }) {
  * separate facts (working memory, 7±2):
  *   1. What: title first, since it's what people read for, with the type
  *      (icon + word, M6) at the end of that line; the stripe still shows type at a glance.
- *   2. Who and when: owner (M7) and due date (M8), tight together. A card with
- *      no context yet (M9) says so here; cards that have it stay quiet, so the
- *      line only shows up when something needs doing.
+ *   2. Who and when: owner (M7) and due date (M8) as one unit: the avatar with
+ *      the name, and the due line right under the name, so they read together.
+ *      A card with no context yet (M9) says so under them; cards that have it
+ *      stay quiet, so the line only shows up when something needs doing.
  *   3. Do: Copy Context, below a thin line (common region).
  * Space inside a group is small and space between groups is larger
  * (Gestalt proximity), so the groups show without adding boxes.
@@ -55,7 +56,7 @@ export function Avatar({ name, size = 'md' }) {
  * so the card looks movable before anyone tries.
  * Copy Context is the main action (indigo); Move to is quieter grey until
  * hovered, so the row has one clear first choice. Both are 44px tall to hit.
- * The menu also has "Up one" / "Down one" (My order), split from the columns
+ * The menu also has "Up one" / "Down one" (Custom order), split from the columns
  * by a line, and only when there's a card to swap with.
  */
 /**
@@ -186,7 +187,7 @@ export default function TaskCard({ task, today, statusLabel, stages, highlighted
   const tint = state ? DUE_STATES[state].tint : 'bg-surface-card';
   // Crisp outlines instead of soft shadows, like an issue list: open cards get a
   // firmer border that darkens on hover; done cards keep a faint one and recede.
-  const depth = state === 'done' ? 'border-slate-200' : 'border-slate-300 hover:border-slate-500';
+  const depth = state === 'done' ? 'border-slate-300' : 'border-slate-300 hover:border-slate-500';
 
   return (
     <li
@@ -198,7 +199,7 @@ export default function TaskCard({ task, today, statusLabel, stages, highlighted
         onDragStart();
       }}
       onDragEnd={onDragEnd}
-      className={`relative rounded-md ${dragging ? 'opacity-50' : ''} border border-l-4 ${typeStyle(task.type).stripe} ${tint} ${depth} px-4 pb-1 pt-3.5 transition-colors duration-200 motion-reduce:transition-none ${
+      className={`relative rounded-xl ${dragging ? 'opacity-50' : ''} border border-l-4 ${typeStyle(task.type).stripe} ${tint} ${depth} px-4 pb-1 pt-3.5 transition-colors duration-200 motion-reduce:transition-none ${
         highlighted ? 'ring-2 ring-brand-primary' : ''
       }`}
     >
@@ -213,7 +214,7 @@ export default function TaskCard({ task, today, statusLabel, stages, highlighted
         type="button"
         id={`open-${task.id}`}
         onClick={() => onOpen(task)}
-        className="block w-full cursor-grab text-left active:cursor-grabbing after:absolute after:inset-0 after:rounded-lg focus:outline-none focus-visible:after:ring-2 focus-visible:after:ring-brand-primary focus-visible:after:ring-offset-2"
+        className="block w-full cursor-grab text-left active:cursor-grabbing after:absolute after:inset-0 after:rounded-xl focus:outline-none focus-visible:after:ring-2 focus-visible:after:ring-brand-primary focus-visible:after:ring-offset-2"
       >
         {/* 1. What */}
         <span className="flex items-start justify-between gap-3">
@@ -222,23 +223,23 @@ export default function TaskCard({ task, today, statusLabel, stages, highlighted
           <TypeBadge type={task.type} small />
         </span>
 
-        {/* 2. Who and when: one left edge, so the eye runs straight down. */}
-        <span className="mt-4 flex flex-col gap-1.5">
-          <span className="flex min-w-0 items-center gap-2">
-            <Avatar name={task.assignee} />
-            <span className="truncate text-sm text-text-muted">
+        {/* 2. Who and when: the name and due line share one left edge beside the avatar. */}
+        <span className="mt-3.5 flex min-w-0 items-center gap-2.5">
+          <Avatar name={task.assignee} size="lg" />
+          <span className="flex min-w-0 flex-col gap-0.5">
+            <span className="truncate text-sm font-medium text-text-primary">
               <span className="sr-only">Owner: </span>
               {task.assignee || 'Unassigned'}
             </span>
+            {state && state !== 'done' && <DueLabel task={task} today={today} />}
           </span>
-          {state && state !== 'done' && <DueLabel task={task} today={today} />}
-          {state !== 'done' && !task.context?.trim() && (
-            <span className="inline-flex items-center gap-1.5 text-[13px] font-medium text-text-primary">
-              <FileText className="h-4 w-4 shrink-0" aria-hidden="true" />
-              No context yet
-            </span>
-          )}
         </span>
+        {state !== 'done' && !task.context?.trim() && (
+          <span className="mt-3 inline-flex items-center gap-1.5 text-[13px] font-medium text-text-primary">
+            <FileText className="h-4 w-4 shrink-0" aria-hidden="true" />
+            No context yet
+          </span>
+        )}
       </button>
 
       {/* 3. Do */}

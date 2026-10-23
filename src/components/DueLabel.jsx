@@ -53,8 +53,9 @@ export function dueText(task, today) {
 }
 
 /**
- * Icon + words + the real date, in the state's colour. Each state has its own
- * icon shape, so it still reads in greyscale and for colour-blind users.
+ * Icon + words + the real date, the whole line in the state's colour. Each state
+ * has its own icon shape and words, so it still reads in greyscale and for
+ * colour-blind users (NFR3, WCAG 1.4.1).
  */
 export default function DueLabel({ task, today }) {
   const state = dueState(task, today);
@@ -64,10 +65,10 @@ export default function DueLabel({ task, today }) {
   return (
     <span className={`inline-flex items-center gap-1.5 text-[13px] font-semibold ${text}`}>
       <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-      {dueText(task, today)}
-      {state !== 'done' && (
-        <span className="font-normal text-text-muted">· {shortDate(task.dueDate)}</span>
-      )}
+      <span>
+        {dueText(task, today)}
+        {state !== 'done' && <span className="font-normal"> · {shortDate(task.dueDate)}</span>}
+      </span>
     </span>
   );
 }
