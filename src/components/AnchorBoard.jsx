@@ -68,11 +68,14 @@ function AnchorCard({ id, label, Icon, url, onSave }) {
         </label>
         {/* The status in words too, not just the dot (NFR: colour never alone).
             Screen readers already hear it in the label, so this copy is hidden from them.
-            On phones it sits under the name; from sm it sits at the right of the name row. */}
+            It sits right after the name, so the dot, name and status read as one unit
+            (proximity) and nobody zoomed in has to look across the card for it.
+            On phones the name column is narrow, so it goes under the name instead. */}
         <span
           aria-hidden="true"
-          className="basis-full pl-[18px] text-xs font-normal text-text-muted max-[359px]:ml-auto max-[359px]:basis-auto max-[359px]:pl-0 sm:ml-auto sm:basis-auto sm:pl-0"
+          className="basis-full pl-[18px] text-[13px] font-normal text-text-muted max-[359px]:basis-auto max-[359px]:pl-0 sm:basis-auto sm:pl-0"
         >
+          <span className="hidden max-[359px]:inline sm:inline">· </span>
           {url ? 'Linked' : 'Not linked'}
         </span>
       </h3>
@@ -97,10 +100,11 @@ function AnchorCard({ id, label, Icon, url, onSave }) {
             target="_blank"
             rel="noopener noreferrer"
             title={`Open ${label} link in a new tab`}
-            className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-1 rounded-md border border-slate-500 text-sm font-medium text-brand-primary hover:bg-brand-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary px-0 sm:px-3 lg:px-0"
+            className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-1 rounded-md border border-slate-500 text-sm font-medium text-brand-primary hover:bg-brand-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary px-0 sm:px-3 lg:px-0 2xl:px-3"
           >
-            {/* Where space is tight (phones, and four across from lg) "Open" shrinks to its icon. */}
-            <span className="sr-only sm:not-sr-only lg:sr-only">Open</span>
+            {/* The word "Open" shows wherever it fits; it only shrinks to its icon on
+                phones and on small laptops (lg to 2xl), where the link field needs the room. */}
+            <span className="sr-only sm:not-sr-only lg:sr-only 2xl:not-sr-only">Open</span>
             <ExternalLink className="h-4 w-4" aria-hidden="true" />
             <span className="sr-only">{`${label} (opens in a new tab)`}</span>
           </a>
