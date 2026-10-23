@@ -30,8 +30,8 @@ export function normaliseUrl(input) {
 }
 
 /**
- * One deliverable: name, empty/filled dot with a word (colour is never the
- * only signal), and a single link field that saves when you leave it or press Enter.
+ * One deliverable: name, empty/filled dot plus "Linked" / "Not linked" (colour is
+ * never the only signal), and a single link field that saves when you leave it or press Enter.
  */
 function AnchorCard({ id, label, Icon, url, onSave }) {
   const [draft, setDraft] = useState(url);
@@ -53,20 +53,28 @@ function AnchorCard({ id, label, Icon, url, onSave }) {
           page grey, a light border, no shadow or stripe, so it doesn't look like a
           task card you can open. Name above its field, like the task form, and the
           four line up with the board's columns below. The
-          dot is hollow or filled (shape, not just colour), and screen readers
-          hear the status in words.
+          dot is hollow or filled (shape, not just colour), with the status in words beside it.
           On phones the name sits beside its field instead of above it, so the
           four take about half the height and the board starts sooner. Below 360px
           (e.g. 400% zoom) there is no room for both, so it goes back above. */}
-      <h3 className="flex w-32 shrink-0 items-center gap-2 text-sm font-semibold text-text-primary max-[359px]:mb-1.5 max-[359px]:w-auto sm:mb-1.5 sm:w-auto">
+      <h3 className="flex w-32 shrink-0 flex-wrap items-center gap-x-2 text-sm font-semibold text-text-primary max-[359px]:mb-1.5 max-[359px]:w-auto sm:mb-1.5 sm:w-auto">
         <span
           className={`h-2.5 w-2.5 shrink-0 rounded-full ${url ? 'bg-brand-primary' : 'border-2 border-slate-500'}`}
           aria-hidden="true"
         />
         <label htmlFor={inputId}>
           {label}
-          <span className="sr-only">{url ? ' link, added' : ' link, none yet'}</span>
+          <span className="sr-only">{url ? ' link, linked' : ' link, not linked'}</span>
         </label>
+        {/* The status in words too, not just the dot (NFR: colour never alone).
+            Screen readers already hear it in the label, so this copy is hidden from them.
+            On phones it sits under the name; from sm it sits at the right of the name row. */}
+        <span
+          aria-hidden="true"
+          className="basis-full pl-[18px] text-xs font-normal text-text-muted max-[359px]:ml-auto max-[359px]:basis-auto max-[359px]:pl-0 sm:ml-auto sm:basis-auto sm:pl-0"
+        >
+          {url ? 'Linked' : 'Not linked'}
+        </span>
       </h3>
       <div className="flex min-w-0 flex-1 items-center gap-2">
         <input

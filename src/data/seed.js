@@ -162,10 +162,133 @@ Nothing left. Update it if we add a page.
         contextTool: 'Claude',
         contextUpdatedAt: hoursAgo(70),
     },
+    {
+        id: 'seed-6',
+        title: 'Add project screenshots',
+        description: 'One screenshot and a two-line summary for each of the three projects on the Projects page.',
+        type: 'feature',
+        status: 'todo',
+        assignee: 'Jordan Lee',
+        dueDate: daysFromToday(6),
+        createdDate: daysFromToday(0),
+        // Just added, so no context yet: shows the card's "No context yet" note.
+        context: '',
+        contextTool: '',
+        contextUpdatedAt: null,
+    },
+    {
+        id: 'seed-7',
+        title: 'Contact form sends blank emails',
+        description: 'Messages arrive in the inbox, but the name and message fields are empty.',
+        type: 'bug',
+        status: 'todo',
+        assignee: 'Alex Morgan',
+        dueDate: daysFromToday(2),
+        createdDate: daysFromToday(-1),
+        context: `## Background
+The form on \`/contact\` posts to Formspree. Emails arrive, but every field is blank.
+
+## Constraints
+- Keep Formspree (free plan).
+- No page reload after sending.
+
+## Tried so far
+Asked Claude to check the form. It says the inputs have no \`name\` attributes, so nothing is sent.
+
+## Outcome
+Not fixed yet.
+
+## Pick up
+Add \`name\` to each input, send a test message, then check the inbox.
+`,
+        contextTool: 'Claude',
+        contextUpdatedAt: hoursAgo(9),
+    },
+    {
+        id: 'seed-8',
+        title: 'Write alt text for all images',
+        description: 'Every image on the site needs alt text that says what it shows, or empty alt if it is decoration.',
+        type: 'feature',
+        status: 'review',
+        assignee: 'Jordan Lee',
+        dueDate: daysFromToday(1),
+        createdDate: daysFromToday(-3),
+        context: `## Background
+An accessibility check flagged 9 images with no alt text.
+
+## Constraints
+- Under 125 characters each.
+- Decorative images get \`alt=""\`.
+
+## Tried so far
+Asked ChatGPT to draft alt text from the file names. Rewrote most of them by hand, because it guessed wrong.
+
+## Outcome
+All 9 images done.
+
+## Pick up
+Check them with a screen reader, then move to Done.
+`,
+        contextTool: 'ChatGPT',
+        contextUpdatedAt: hoursAgo(4),
+    },
+    {
+        id: 'seed-9',
+        title: 'Deploy to Vercel',
+        description: 'Put the site online on a free Vercel link that anyone can open.',
+        type: 'feature',
+        status: 'done',
+        assignee: 'Sam Patel',
+        dueDate: daysFromToday(-2),
+        createdDate: daysFromToday(-5),
+        context: `## Background
+The site only ran on our laptops.
+
+## Constraints
+Free plan, no login needed to view it.
+
+## Tried so far
+Connected the GitHub repo to Vercel. The first build failed on a wrong import path.
+
+## Outcome
+Fixed the path. Live on the Vercel link.
+
+## Pick up
+Nothing left. New pushes deploy automatically.
+`,
+        contextTool: 'Claude',
+        contextUpdatedAt: hoursAgo(50),
+    },
+    {
+        id: 'seed-10',
+        title: 'Footer links go to the wrong pages',
+        description: 'The About and CV links in the footer both open the home page.',
+        type: 'bug',
+        status: 'done',
+        assignee: 'Jordan Lee',
+        dueDate: daysFromToday(-1),
+        createdDate: daysFromToday(-3),
+        context: `## Background
+Footer links in \`Footer.jsx\` all point to \`/\`.
+
+## Constraints
+Same paths as the nav menu.
+
+## Tried so far
+Cursor suggested sharing one list of links between the nav and the footer.
+
+## Outcome
+Both now use one list, so they can't drift apart again.
+
+## Pick up
+Nothing left.
+`,
+        contextTool: 'Cursor',
+        contextUpdatedAt: hoursAgo(30),
+    },
 ];
 
-// Deliverable links shown on first load (M11), so the board shows both dot
-// states: two filled, two still empty. Swap in your real links in the app.
+// Deliverable links shown on first load (M11), so the board shows both states: two filled, two still empty. Swap in your real links in the app.
 // To see changes here after the first load, clear 'vibetracker.anchors' in localStorage.
 export const SEED_ANCHORS = {
     presentation: '',
