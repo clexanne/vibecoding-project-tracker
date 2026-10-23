@@ -15,13 +15,13 @@ import { TASK_TYPES } from './TypeBadge.jsx';
 export const SORTS = [
   { id: 'due', label: 'Due date' },
   { id: 'newest', label: 'Date added' },
-  { id: 'manual', label: 'My order' },
+  { id: 'manual', label: 'Custom order' },
 ];
 
 // Tasks without a due date go last when sorting by due date.
 // createdDate has no time, so tasks added the same day tie; for "Date added" (newest first)
 // we reverse before sorting so the last one added still comes out on top.
-// "My order" is the tasks list as it's saved, which dragging or "Up one" / "Down one" changes.
+// "Custom order" is the tasks list as it's saved, which dragging or "Up one" / "Down one" changes.
 export function sortTasks(tasks, sortId) {
   if (sortId === 'due') return [...tasks].sort((a, b) => (a.dueDate ?? '9999').localeCompare(b.dueDate ?? '9999'));
   if (sortId === 'newest') return [...tasks].reverse().sort((a, b) => b.createdDate.localeCompare(a.createdDate));
