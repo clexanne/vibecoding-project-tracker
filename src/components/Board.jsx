@@ -97,7 +97,7 @@ export default function Board({ stages, tasks, today, highlightId, onOpenTask, o
         })}
       </ul>
 
-      <div className={`grid grid-cols-1 gap-6 sm:grid-cols-2 ${doneCollapsed ? 'xl:grid-cols-[repeat(3,minmax(0,1fr))_11rem]' : 'xl:grid-cols-4'}`}>
+      <div className={`grid grid-cols-1 gap-6 sm:grid-cols-2 ${doneCollapsed ? 'xl:grid-cols-[repeat(3,minmax(0,1fr))_14rem]' : 'xl:grid-cols-4'}`}>
         {stages.map((stage) => {
           const columnTasks = tasks.filter((task) => task.status === stage.id);
           const headingId = `column-${stage.id}`;
