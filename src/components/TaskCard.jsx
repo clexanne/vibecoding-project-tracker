@@ -188,6 +188,9 @@ export default function TaskCard({ task, today, statusLabel, stages, highlighted
   // Crisp outlines instead of soft shadows, like an issue list: open cards get a
   // firmer border that darkens on hover; done cards keep a faint one and recede.
   const depth = state === 'done' ? 'border-slate-300' : 'border-slate-300 hover:border-slate-500';
+  // Done cards use softer text (still AA on the grey card), so open work reads first.
+  const titleText = state === 'done' ? 'text-slate-700' : 'text-text-primary';
+  const nameText = state === 'done' ? 'text-text-muted' : 'text-text-primary';
 
   return (
     <li
@@ -219,7 +222,7 @@ export default function TaskCard({ task, today, statusLabel, stages, highlighted
         {/* 1. What */}
         <span className="flex items-start justify-between gap-3">
           {/* Long titles wrap anywhere and stop at 3 lines, so a pasted prompt can't break the board (NFR2). */}
-          <span className="min-w-0 text-base font-semibold leading-snug text-text-primary [overflow-wrap:anywhere] line-clamp-3">{task.title}</span>
+          <span className={`min-w-0 text-base font-semibold leading-snug ${titleText} [overflow-wrap:anywhere] line-clamp-3`}>{task.title}</span>
           <TypeBadge type={task.type} small />
         </span>
 
@@ -227,7 +230,7 @@ export default function TaskCard({ task, today, statusLabel, stages, highlighted
         <span className="mt-3.5 flex min-w-0 items-center gap-2.5">
           <Avatar name={task.assignee} size="lg" />
           <span className="flex min-w-0 flex-col gap-0.5">
-            <span className="truncate text-sm font-medium text-text-primary">
+            <span className={`truncate text-sm font-medium ${nameText}`}>
               <span className="sr-only">Owner: </span>
               {task.assignee || 'Unassigned'}
             </span>

@@ -50,10 +50,10 @@ These are the colors the build milestones will reference. Once chosen, paste the
 
 | Token | Hex | When used |
 |---|---|---|
-| `due-safe` | `#475569` slate, no tint (`due-safe-bg` `#FFFFFF`, 7.6:1); upcoming is the normal case so it stays quiet, and blue sat too close to the brand colour. Due dates have no time, so in the app this covers every day after today ("Due tomorrow", "Due in 3 days") | More than 2 days out |
+| `due-safe` | `#475569` slate text on the plain white card (7.6:1), with a calendar icon and the words ("Due tomorrow", "Due in 3 days"). Left neutral on purpose, so only due-soon and overdue cards pull the eye. Due dates have no time, so this covers every day after today | Due after today |
 | `due-warning` | `#B45309` amber, card tint `due-warning-bg` `#FFFBEB` (4.8:1; pure yellow fails contrast). Due dates have no time, so "less than 24 hours" shows as "Due today" | Less than 24 hours |
 | `due-overdue` | `#B91C1C` red, card tint `due-overdue-bg` `#FEF2F2` (5.9:1) | Past due |
-| `due-neutral` | `#475569` grey, card tint `due-neutral-bg` `#F1F5F9` (6.9:1), flat grey with a fainter border, so done cards sit back | Done (overrides date) |
+| `due-neutral` | `#475569` grey, card tint `due-neutral-bg` `#E9EEF4`, a step greyer than the slate-100 column, title slate-700 (8.9:1) and name slate-600 (6.5:1), flat with a fainter border, so done cards sit back without opacity | Done (overrides date) |
 
 ## 3. Typography
 

@@ -5,6 +5,7 @@ export default {
     extend: {
       colors: {
         // DESIGN.md §2 — brand. A deep blue: calm and trustworthy, it stays clear
+        // for red-green colour blindness, and sits far from Bug purple (7.8:1 on white).
         'brand-primary': '#1F49B8',
         'brand-accent': '#EEF4FF',
         'surface-page': '#F8FAFC',
@@ -26,7 +27,7 @@ export default {
         'due-overdue': '#B91C1C',
         'due-overdue-bg': '#FEF2F2',
         'due-neutral': '#475569',
-        'due-neutral-bg': '#F8FAFC',  // a step lighter than the slate-100 column, so done cards don't vanish
+        'due-neutral-bg': '#E9EEF4',  // a step greyer than the slate-100 column, so done cards sit back (slate-700 title 8.9:1)
       },
       fontFamily: {
         // DESIGN.md §3
