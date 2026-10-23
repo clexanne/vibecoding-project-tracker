@@ -1,9 +1,9 @@
+import { Users } from 'lucide-react';
 import { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react';
 import AnchorBoard, { DELIVERABLES } from './components/AnchorBoard.jsx';
 import Board from './components/Board.jsx';
 import BoardToolbar, { sortTasks } from './components/BoardToolbar.jsx';
 import TaskModal from './components/TaskModal.jsx';
-import { Users } from 'lucide-react';
 import TeamModal from './components/TeamModal.jsx';
 import Toast from './components/Toast.jsx';
 import { SEED_ANCHORS, SEED_TASKS } from './data/seed.js';
@@ -384,17 +384,22 @@ export default function App() {
               <span className="sr-only">, home</span>
             </h1>
           </a>
-          {/* The team lives in its own dialog, so the board keeps the prime space. */}
+          {/* The team lives in its own dialog, so the board keeps the prime space.
+              Built like the toolbar controls (same height, corners and border), so it
+              reads as a button at a glance (similarity). A people icon plus the word
+              "Team" says what it opens, and the count says how many, like the column
+              counts. No initials here: three circles in a box looked like decoration. */}
           <button
             type="button"
             onClick={() => setTeamOpen(true)}
-            className="ml-auto flex min-h-11 shrink-0 items-center gap-2 rounded-md border border-slate-500 bg-surface-card px-4 text-sm font-medium text-text-primary hover:bg-brand-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
+            className="ml-auto flex min-h-11 shrink-0 items-center gap-2 rounded-md border border-slate-500 bg-surface-card px-4 text-sm font-semibold text-text-primary hover:bg-brand-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
           >
-            <Users className="h-4 w-4 text-text-muted" aria-hidden="true" />
+            <Users className="h-5 w-5 text-brand-primary" aria-hidden="true" />
             Team
-            {/* "· 3 people", not a bare "3", which could pass for an alert count. */}
-            <span className="text-text-muted">
-              · {members.length === 1 ? '1 person' : `${members.length} people`}
+            <span className="min-w-7 rounded-full bg-slate-100 px-2 py-0.5 text-center text-sm font-medium text-text-muted">
+              <span className="sr-only">, </span>
+              {members.length}
+              <span className="sr-only">{members.length === 1 ? ' person' : ' people'}</span>
             </span>
           </button>
         </header>

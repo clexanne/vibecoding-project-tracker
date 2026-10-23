@@ -184,9 +184,9 @@ function MoveMenu({ task, stages, prevId, nextId, onMove, onPlace }) {
 export default function TaskCard({ task, today, statusLabel, stages, highlighted, dragging, dropSide, prevId, nextId, onOpen, onMove, onPlace, onDragStart, onDragEnd, onCopied }) {
   const state = dueState(task, today);
   const tint = state ? DUE_STATES[state].tint : 'bg-surface-card';
-  // Open cards are white and lifted; done cards sit flat in the column's grey,
-  // so finished work recedes and the eye goes to what's left.
-  const depth = state === 'done' ? '' : 'shadow-sm hover:shadow-md';
+  // Crisp outlines instead of soft shadows, like an issue list: open cards get a
+  // firmer border that darkens on hover; done cards keep a faint one and recede.
+  const depth = state === 'done' ? 'border-slate-200' : 'border-slate-300 hover:border-slate-500';
 
   return (
     <li
@@ -198,7 +198,7 @@ export default function TaskCard({ task, today, statusLabel, stages, highlighted
         onDragStart();
       }}
       onDragEnd={onDragEnd}
-      className={`relative rounded-lg ${dragging ? 'opacity-50' : ''} border border-l-4 border-slate-200 ${typeStyle(task.type).stripe} ${tint} ${depth} px-4 pb-1 pt-3.5 transition-shadow duration-200 motion-reduce:transition-none ${
+      className={`relative rounded-md ${dragging ? 'opacity-50' : ''} border border-l-4 ${typeStyle(task.type).stripe} ${tint} ${depth} px-4 pb-1 pt-3.5 transition-colors duration-200 motion-reduce:transition-none ${
         highlighted ? 'ring-2 ring-brand-primary' : ''
       }`}
     >

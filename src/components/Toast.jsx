@@ -29,7 +29,7 @@ const Toast = forwardRef(function Toast({ message, visible, action, onHold, onRe
             type="button"
             ref={actionRef}
             onClick={action.onClick}
-            className="min-h-11 rounded px-3 font-semibold text-indigo-200 underline underline-offset-2 hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+            className="min-h-11 rounded px-3 font-semibold text-blue-200 underline underline-offset-2 hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
           >
             {action.label}
           </button>

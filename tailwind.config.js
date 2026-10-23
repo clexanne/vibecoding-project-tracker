@@ -4,9 +4,9 @@ export default {
   theme: {
     extend: {
       colors: {
-        // DESIGN.md §2 — brand
-        'brand-primary': '#4338CA',
-        'brand-accent': '#EEF2FF',
+        // DESIGN.md §2 — brand. A deep blue: calm and trustworthy, it stays clear
+        'brand-primary': '#1F49B8',
+        'brand-accent': '#EEF4FF',
         'surface-page': '#F8FAFC',
         'surface-card': '#FFFFFF',
         'text-primary': '#0F172A',

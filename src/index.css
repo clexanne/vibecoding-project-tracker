@@ -19,3 +19,11 @@ input::placeholder,
 textarea::placeholder {
   color: #64748b;
 }
+
+/* Page and section headings (logo name, Deliverables, columns, dialog titles) in
+   Space Grotesk, so the app has its own voice. Smaller labels and all body
+   text stay Inter, which is easier to read in long runs. */
+h1,
+h2 {
+  font-family: 'Space Grotesk', Inter, ui-sans-serif, system-ui, sans-serif;
+}

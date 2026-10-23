@@ -1,8 +1,13 @@
 import { useState } from 'react';
-import { ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { ChevronsLeft, ChevronsRight, Circle, CircleCheck, CircleDot, Eye } from 'lucide-react';
 import TaskCard from './TaskCard.jsx';
 
 // Whether Done is collapsed, remembered per browser like a column you folded in Jira or Trello.
+// A status icon per column, like GitHub's issue states: the shape says the stage
+// (empty, started, being checked, finished), so it doesn't need a colour of its
+// own. Colour stays reserved for task type and due date.
+const STAGE_ICONS = { todo: Circle, 'in-progress': CircleDot, review: Eye, done: CircleCheck };
+
 const DONE_KEY = 'vibetracker.doneCollapsed';
 const readCollapsed = () => {
   try {
@@ -96,6 +101,7 @@ export default function Board({ stages, tasks, today, highlightId, onOpenTask, o
         {stages.map((stage) => {
           const columnTasks = tasks.filter((task) => task.status === stage.id);
           const headingId = `column-${stage.id}`;
+          const StageIcon = STAGE_ICONS[stage.id];
           const listId = `column-list-${stage.id}`;
           const collapsible = stage.id === 'done';
           const collapsed = collapsible && doneCollapsed;
@@ -124,14 +130,17 @@ export default function Board({ stages, tasks, today, highlightId, onOpenTask, o
                 else if (draggingId) onMove(draggingId, stage.id);
                 endDrag();
               }}
-              className={`flex-col rounded-xl p-4 sm:flex ${phoneStage === stage.id ? 'flex' : 'hidden'} ${
-                isTarget ? 'bg-brand-accent outline-dashed outline-2 -outline-offset-2 outline-brand-primary' : 'bg-slate-100'
+              className={`flex-col rounded-lg border p-4 sm:flex ${phoneStage === stage.id ? 'flex' : 'hidden'} ${
+                isTarget ? 'border-transparent bg-brand-accent outline-dashed outline-2 -outline-offset-2 outline-brand-primary' : 'border-slate-300 bg-slate-50'
               }`}
             >
               <div className="mb-4 flex items-center gap-2">
                 <h2 id={headingId} className="flex flex-1 items-center justify-between gap-2 text-lg font-semibold text-text-primary">
-                  {stage.label}
-                  <span className="min-w-7 rounded-full bg-surface-card px-2.5 py-0.5 text-center text-sm font-medium text-text-muted">
+                  <span className="flex items-center gap-2">
+                    <StageIcon className="h-5 w-5 shrink-0 text-brand-primary" aria-hidden="true" />
+                    {stage.label}
+                  </span>
+                  <span className="min-w-7 rounded-full bg-slate-200/70 px-2.5 py-0.5 text-center text-sm font-medium text-text-muted">
                     <span className="sr-only">, number of tasks: </span>
                     {columnTasks.length}
                   </span>
