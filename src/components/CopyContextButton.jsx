@@ -67,7 +67,7 @@ export default function CopyContextButton({ task, statusLabel, onCopied, quiet =
       <Icon className="h-4 w-4" aria-hidden="true" />
       {copied ? 'Copied' : 'Copy Context'}
       {/* Every card has this button, so each needs its own name in a screen reader's list. */}
-      <span className="sr-only"> for {task.title}</span>
+      <span className="sr-only"> for {task.title.trim() || 'this task'}</span>
     </button>
   );
 }

@@ -48,14 +48,17 @@ function AnchorCard({ id, label, Icon, url, onSave }) {
   };
 
   return (
-    <li className="rounded-lg border border-slate-200 bg-surface-card p-3">
+    <li className="flex items-center gap-3 rounded-lg border border-slate-200 bg-surface-card p-2 pl-3 max-[359px]:block max-[359px]:p-3 sm:block sm:p-3">
       {/* A plain card per deliverable (M11: "four labeled cards"): white on the
           page grey, a light border, no shadow or stripe, so it doesn't look like a
           task card you can open. Name above its field, like the task form, and the
           four line up with the board's columns below. The
           dot is hollow or filled (shape, not just colour), and screen readers
-          hear the status in words. */}
-      <h3 className="mb-1.5 flex items-center gap-2 text-sm font-semibold text-text-primary">
+          hear the status in words.
+          On phones the name sits beside its field instead of above it, so the
+          four take about half the height and the board starts sooner. Below 360px
+          (e.g. 400% zoom) there is no room for both, so it goes back above. */}
+      <h3 className="flex w-32 shrink-0 items-center gap-2 text-sm font-semibold text-text-primary max-[359px]:mb-1.5 max-[359px]:w-auto sm:mb-1.5 sm:w-auto">
         <span
           className={`h-2.5 w-2.5 shrink-0 rounded-full ${url ? 'bg-brand-primary' : 'border-2 border-slate-500'}`}
           aria-hidden="true"
@@ -65,7 +68,7 @@ function AnchorCard({ id, label, Icon, url, onSave }) {
           <span className="sr-only">{url ? ' link, added' : ' link, none yet'}</span>
         </label>
       </h3>
-      <div className="flex items-center gap-2">
+      <div className="flex min-w-0 flex-1 items-center gap-2">
         <input
           id={inputId}
           type="url"
@@ -86,10 +89,10 @@ function AnchorCard({ id, label, Icon, url, onSave }) {
             target="_blank"
             rel="noopener noreferrer"
             title={`Open ${label} link in a new tab`}
-            className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-1 rounded-md border border-slate-500 px-3 text-sm font-medium text-brand-primary hover:bg-brand-accent focus:outline-none focus:ring-2 focus:ring-brand-primary lg:px-0"
+            className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-1 rounded-md border border-slate-500 text-sm font-medium text-brand-primary hover:bg-brand-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary px-0 sm:px-3 lg:px-0"
           >
-            {/* Four cards share one row from lg, so "Open" shrinks to its icon there. */}
-            <span className="lg:sr-only">Open</span>
+            {/* Where space is tight (phones, and four across from lg) "Open" shrinks to its icon. */}
+            <span className="sr-only sm:not-sr-only lg:sr-only">Open</span>
             <ExternalLink className="h-4 w-4" aria-hidden="true" />
             <span className="sr-only">{`${label} (opens in a new tab)`}</span>
           </a>
@@ -112,7 +115,7 @@ function AnchorCard({ id, label, Icon, url, onSave }) {
  */
 export default function AnchorBoard({ anchors, onSave }) {
   return (
-    <section aria-labelledby="deliverables-heading" className="mb-10">
+    <section aria-labelledby="deliverables-heading" className="mb-8 sm:mb-10">
       {/* No hint line: the heading, the four names and "Paste a link" already
           say what to do. Same heading size as the board's columns (same level). */}
       <h2 id="deliverables-heading" className="mb-3 text-lg font-semibold text-text-primary">
@@ -122,7 +125,7 @@ export default function AnchorBoard({ anchors, onSave }) {
           on small laptops, and from 1280px each card sits over a column.
           No line under the section: the cards end it, and the big gap below
           (40px, vs 12px inside a section) tells the two sections apart. */}
-      <ul className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-4">
+      <ul className="grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2 sm:gap-y-4 lg:grid-cols-4">
         {DELIVERABLES.map((deliverable) => (
           <AnchorCard key={deliverable.id} {...deliverable} url={anchors[deliverable.id] ?? ''} onSave={onSave} />
         ))}

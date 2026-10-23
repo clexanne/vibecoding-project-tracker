@@ -15,11 +15,13 @@ import { TASK_TYPES } from './TypeBadge.jsx';
 export const SORTS = [
   { id: 'due', label: 'Due date' },
   { id: 'newest', label: 'Date added' },
+  { id: 'manual', label: 'My order' },
 ];
 
 // Tasks without a due date go last when sorting by due date.
 // createdDate has no time, so tasks added the same day tie; for "Date added" (newest first)
 // we reverse before sorting so the last one added still comes out on top.
+// "My order" is the tasks list as it's saved, which dragging or "Up one" / "Down one" changes.
 export function sortTasks(tasks, sortId) {
   if (sortId === 'due') return [...tasks].sort((a, b) => (a.dueDate ?? '9999').localeCompare(b.dueDate ?? '9999'));
   if (sortId === 'newest') return [...tasks].reverse().sort((a, b) => b.createdDate.localeCompare(a.createdDate));
@@ -29,7 +31,7 @@ export function sortTasks(tasks, sortId) {
 function Dropdown({ id, label, value, onChange, active, children }) {
   return (
     <div
-      className={`relative flex h-11 items-center rounded-md border pl-3 focus-within:ring-2 focus-within:ring-brand-primary focus-within:ring-offset-2 ${
+      className={`relative flex h-11 items-center rounded-md border pl-3 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand-primary has-[:focus-visible]:ring-offset-2 ${
         active ? 'border-brand-primary bg-brand-accent' : 'border-slate-500 bg-surface-card hover:bg-slate-50'
       }`}
     >
@@ -88,7 +90,7 @@ export default function BoardToolbar({ onNewTask, members, focusName, onFocus, t
       <button
         type="button"
         onClick={onNewTask}
-        className="ml-auto min-h-11 rounded-md border border-transparent bg-brand-primary px-4 text-sm font-medium text-white hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2"
+        className="ml-auto min-h-11 rounded-md border border-transparent bg-brand-primary px-4 text-sm font-medium text-white hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
       >
         + New task
       </button>

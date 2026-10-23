@@ -71,14 +71,14 @@ export default function ConfirmDialog({ title, message, confirmLabel, cancelLabe
             ref={cancelRef}
             type="button"
             onClick={onCancel}
-            className="min-h-11 whitespace-nowrap rounded-md border border-slate-500 px-4 text-sm font-medium text-text-primary hover:bg-brand-accent focus:outline-none focus:ring-2 focus:ring-brand-primary"
+            className="min-h-11 whitespace-nowrap rounded-md border border-slate-500 px-4 text-sm font-medium text-text-primary hover:bg-brand-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary"
           >
             {cancelLabel}
           </button>
           <button
             type="button"
             onClick={onConfirm}
-            className="min-h-11 whitespace-nowrap rounded-md border border-transparent bg-due-overdue px-4 text-sm font-medium text-white hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-due-overdue focus:ring-offset-2"
+            className="min-h-11 whitespace-nowrap rounded-md border border-transparent bg-due-overdue px-4 text-sm font-medium text-white hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-due-overdue focus-visible:ring-offset-2"
           >
             {confirmLabel}
           </button>

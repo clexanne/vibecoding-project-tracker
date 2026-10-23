@@ -23,6 +23,10 @@ import { SEED_ANCHORS, SEED_TASKS } from './data/seed.js';
  *   - M10 copy-context  : CopyContextButton.jsx (on every card and in the modal) + the
  *                         "Copied to clipboard" toast (the stretch goal).
  *   - M11 project-deliverables : AnchorBoard.jsx, pinned above the board.
+ *   - M12 secret-sauce  : drag a card to another column, or use its "Move to" menu
+ *                         (Board.jsx, TaskCard.jsx), or drag it up or down for "My order";
+ *                         moves and deletes can be undone
+ *                         from the toast; the Done column can be collapsed.
  *   - Extras: BoardToolbar.jsx (owner/type filters, sort), TeamModal.jsx, ConfirmDialog.jsx.
  */
 
@@ -140,30 +144,136 @@ export default function App() {
     setEditing(null);
   };
 
+  // Focus a card's main button after the board re-renders (it may have changed column),
+  // or the board itself if that card isn't on screen (filtered out, or another phone column).
+  const focusCard = (id) =>
+    requestAnimationFrame(() => {
+      const card = document.getElementById(`open-${id}`);
+      (card?.offsetParent ? card : document.getElementById('board'))?.focus();
+    });
+
+  // Deleting doesn't ask first: it happens, and the toast offers Undo instead.
+  // Focus goes to Undo, since the card that opened the modal is gone.
   const deleteTask = (id) => {
-    const { title } = tasks.find((task) => task.id === id);
+    const index = tasks.findIndex((task) => task.id === id);
+    const removed = tasks[index];
     setTasks(tasks.filter((task) => task.id !== id));
     setEditing(null);
-    showToast(`Deleted "${title}".`);
-    // The card that opened the modal is gone, so focus goes to the board, not lost on the page.
-    requestAnimationFrame(() => document.getElementById('board')?.focus());
+    showToast(`Deleted "${removed.title}".`, {
+      label: 'Undo',
+      onClick: () => {
+        setTasks((current) => [...current.slice(0, index), removed, ...current.slice(index)]);
+        setHighlightId(id);
+        showToast(`"${removed.title}" is back.`);
+        focusCard(id);
+      },
+    });
+    requestAnimationFrame(() => (toastActionRef.current ?? document.getElementById('board'))?.focus());
   };
 
-  // M7: toast + a brief ring on the card acknowledge a handoff.
-  const [toast, setToast] = useState({ message: '', visible: false });
+  // M12: a card dragged to another column, or moved with its "Move to" menu.
+  // In My order it goes to the bottom of its new column, like a new card would.
+  const moveTask = (id, status) => {
+    const index = tasks.findIndex((task) => task.id === id);
+    const moved = tasks[index];
+    if (!moved || moved.status === status) return;
+    const from = moved.status;
+    // Moved with the keyboard from its menu: keep focus on that menu in the card's new column.
+    const fromMenu = document.activeElement?.id === `move-${id}`;
+    setTasks(
+      sortId === 'manual'
+        ? [...tasks.filter((task) => task.id !== id), { ...moved, status }]
+        : tasks.map((task) => (task.id === id ? { ...task, status } : task)),
+    );
+    setHighlightId(id);
+    if (fromMenu) focusMenu(id);
+    showToast(`Moved "${moved.title}" to ${STAGES.find((stage) => stage.id === status).label}.`, {
+      label: 'Undo',
+      onClick: () => {
+        setTasks((current) => {
+          const rest = current.filter((task) => task.id !== id);
+          return [...rest.slice(0, index), { ...moved, status: from }, ...rest.slice(index)];
+        });
+        setHighlightId(id);
+        showToast(`"${moved.title}" is back in ${STAGES.find((stage) => stage.id === from).label}.`);
+        focusCard(id);
+      },
+    });
+  };
+
+  // My order: a card dropped at a spot between cards, or nudged with "Up one" /
+  // "Down one". The board shows the tasks list in its saved order, so placing a
+  // card moves it in that list, just before or after another card. If a sort was
+  // on, the list takes that sort's order first, so no other card jumps.
+  const placeTask = (id, status, { before, after } = {}) => {
+    const moved = tasks.find((task) => task.id === id);
+    if (!moved || id === before || id === after) return;
+    const shown = sortTasks(tasks, sortId);
+    const rest = shown.filter((task) => task.id !== id);
+    const target = rest.findIndex((task) => task.id === (before ?? after));
+    const index = target < 0 ? rest.length : before ? target : target + 1;
+    const next = [...rest.slice(0, index), { ...moved, status }, ...rest.slice(index)];
+    const ids = (list) => list.map((task) => task.id).join();
+    if (moved.status === status && ids(next) === ids(shown)) return;
+
+    const from = moved.status;
+    const order = new Map(tasks.map((task, i) => [task.id, i]));
+    const sortBefore = sortId;
+    const fromMenu = document.activeElement?.id === `move-${id}`;
+    setTasks(next);
+    setSortId('manual');
+    setHighlightId(id);
+    if (fromMenu) focusMenu(id);
+    const where = from === status ? 'Moved' : `Moved to ${STAGES.find((stage) => stage.id === status).label}:`;
+    const switched = sortBefore === 'manual' ? '' : ' Sorted by My order.';
+    showToast(`${where} "${moved.title}".${switched}`, {
+      label: 'Undo',
+      onClick: () => {
+        setTasks((current) =>
+          current
+            .map((task) => (task.id === id ? { ...task, status: from } : task))
+            .sort((a, b) => (order.get(a.id) ?? Infinity) - (order.get(b.id) ?? Infinity)),
+        );
+        setSortId(sortBefore);
+        setHighlightId(id);
+        showToast(`"${moved.title}" is back where it was.`);
+        focusCard(id);
+      },
+    });
+  };
+
+  // Keep focus on a card's menu after it moved, so the next key press acts on the same card.
+  const focusMenu = (id) =>
+    requestAnimationFrame(() => {
+      const menu = document.getElementById(`move-${id}`);
+      (menu?.offsetParent ? menu : document.getElementById('board'))?.focus();
+    });
+
+  // M7: toast + a brief ring on the card acknowledge a handoff (and moves).
+  const [toast, setToast] = useState({ message: '', visible: false, action: null });
   const [highlightId, setHighlightId] = useState(null);
   const timers = useRef([]);
+  const toastActionRef = useRef(null);
 
-  function showToast(message) {
-    setToast({ message, visible: true });
+  // 5 seconds, so slower readers can finish the longer messages; 10 when there's
+  // an Undo to reach.
+  function hideToastIn(ms) {
     timers.current.forEach(clearTimeout);
     timers.current = [
       setTimeout(() => setHighlightId(null), 1500),
-      // 5 seconds, so slower readers can finish the longer messages.
-      setTimeout(() => setToast((current) => ({ ...current, visible: false })), 5000),
-      setTimeout(() => setToast({ message: '', visible: false }), 5200),
+      setTimeout(() => setToast((current) => ({ ...current, visible: false })), ms),
+      setTimeout(() => setToast({ message: '', visible: false, action: null }), ms + 200),
     ];
   }
+
+  function showToast(message, action = null) {
+    setToast({ message, visible: true, action });
+    hideToastIn(action ? 10_000 : 5000);
+  }
+
+  // While the pointer or focus is on the toast's Undo, it stays; leaving restarts the clock.
+  const holdToast = () => timers.current.slice(1).forEach(clearTimeout);
+  const releaseToast = () => hideToastIn(5000);
 
   // Saving with a new Owner is a handoff (M7.1): ring the card and show a toast.
   function acknowledgeHandOff(id, name) {
@@ -193,10 +303,30 @@ export default function App() {
     // No toast here: it would cover the dialog's buttons. The Team dialog says it inline.
   };
 
+  // Tasks store the owner's name, so a new name is carried over to their tasks.
+  const updateMember = (id, fields) => {
+    const before = fullName(team.find((member) => member.id === id));
+    const after = fullName(fields);
+    setTeam(team.map((member) => (member.id === id ? { ...member, ...fields } : member)));
+    if (after !== before) {
+      setTasks(tasks.map((task) => (task.assignee === before ? { ...task, assignee: after } : task)));
+      if (focusName === before) setFocusName(after);
+    }
+  };
+
+  // Their tasks stay on the board, unassigned, so no work disappears with them.
+  const removeMember = (id) => {
+    const name = fullName(team.find((member) => member.id === id));
+    setTeam(team.filter((member) => member.id !== id));
+    setTasks(tasks.map((task) => (task.assignee === name ? { ...task, assignee: '' } : task)));
+    if (focusName === name) setFocusName(null);
+  };
+
   // Picking a teammate shows only their tasks; null ("Everyone") shows all.
   const [focusName, setFocusName] = useState(null);
   const [typeId, setTypeId] = useState(null);
-  const [sortId, setSortId] = useState('due');
+  // Remembered, so an order you arranged is still showing after a reload.
+  const [sortId, setSortId] = useLocalStorage('vibetracker.sort', 'due');
   const filtered = tasks.filter((task) => (!focusName || task.assignee === focusName) && (!typeId || task.type === typeId));
   const visibleTasks = sortTasks(filtered, sortId);
   const clearFilters = () => {
@@ -231,13 +361,13 @@ export default function App() {
           Skip to board
         </a>
 
-        <header className="-mx-4 -mt-4 mb-6 flex flex-wrap items-center gap-x-8 gap-y-3 border-b border-slate-200 bg-surface-card px-4 py-3 sm:-mx-8 sm:-mt-8 sm:px-8">
+        <header className="-mx-4 -mt-4 mb-6 flex flex-wrap items-center gap-x-3 gap-y-3 sm:gap-x-8 border-b border-slate-200 bg-surface-card px-4 py-3 sm:-mx-8 sm:-mt-8 sm:px-8">
           {/* Logo top left, linked home, as people expect. The mark is a mini
               board (columns of cards), so it says what the tool is. It keeps
               its colours in high-contrast mode, or the white mark would vanish. */}
           <a
             href="/"
-            className="inline-flex items-center gap-3 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
+            className="inline-flex min-w-0 flex-1 items-center gap-3 rounded-md sm:flex-none focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
           >
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-primary forced-color-adjust-none">
               <svg viewBox="0 0 24 24" className="h-7 w-7 fill-white" aria-hidden="true">
@@ -249,7 +379,7 @@ export default function App() {
                 <rect x="16" y="4" width="5" height="4" rx="1" />
               </svg>
             </span>
-            <h1 className="text-xl font-semibold text-brand-primary sm:text-2xl">
+            <h1 className="text-lg font-semibold leading-tight text-brand-primary sm:text-2xl">
               Vibecoding Project Tracker
               <span className="sr-only">, home</span>
             </h1>
@@ -258,7 +388,7 @@ export default function App() {
           <button
             type="button"
             onClick={() => setTeamOpen(true)}
-            className="ml-auto flex min-h-11 items-center gap-2 rounded-md border border-slate-500 bg-surface-card px-4 text-sm font-medium text-text-primary hover:bg-brand-accent focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2"
+            className="ml-auto flex min-h-11 shrink-0 items-center gap-2 rounded-md border border-slate-500 bg-surface-card px-4 text-sm font-medium text-text-primary hover:bg-brand-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
           >
             <Users className="h-4 w-4 text-text-muted" aria-hidden="true" />
             Team
@@ -292,6 +422,8 @@ export default function App() {
             today={today}
             highlightId={highlightId}
             onOpenTask={setEditing}
+            onMove={moveTask}
+            onPlace={placeTask}
             onCopied={acknowledgeCopy}
             emptyText={focusName || typeId ? 'No matching tasks here' : undefined}
           />
@@ -310,9 +442,25 @@ export default function App() {
         />
       )}
 
-      {teamOpen && <TeamModal team={team} onAdd={addMember} onClose={closeTeam} />}
+      {teamOpen && (
+        <TeamModal
+          team={team}
+          tasks={tasks}
+          onAdd={addMember}
+          onUpdate={updateMember}
+          onRemove={removeMember}
+          onClose={closeTeam}
+        />
+      )}
 
-      <Toast message={toast.message} visible={toast.visible} />
+      <Toast
+        ref={toastActionRef}
+        message={toast.message}
+        visible={toast.visible}
+        action={toast.action}
+        onHold={holdToast}
+        onRelease={releaseToast}
+      />
     </div>
   );
 }

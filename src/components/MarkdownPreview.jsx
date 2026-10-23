@@ -66,7 +66,7 @@ export default function MarkdownPreview({ markdown }) {
   if (!blocks.length) return <p className="text-sm text-text-muted">Nothing to preview yet.</p>;
 
   return (
-    <div className="space-y-2 text-sm leading-relaxed text-text-primary">
+    <div className="space-y-2 text-sm leading-relaxed text-text-primary [overflow-wrap:anywhere]">
       {blocks.map((block, i) => {
         // Headings in the Context are labels inside the dialog, so they show as
         // bold text, not as page headings that would break the heading outline.

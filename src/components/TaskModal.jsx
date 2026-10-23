@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Eye, Trash2 } from 'lucide-react';
+import { Eye, PenLine, Trash2 } from 'lucide-react';
 import { TASK_TYPES, typeStyle } from './TypeBadge.jsx';
 import CopyContextButton from './CopyContextButton.jsx';
 import ConfirmDialog from './ConfirmDialog.jsx';
@@ -16,16 +16,6 @@ export const AI_TOOLS = ['Claude', 'ChatGPT', 'Cursor', 'Lovable', 'Replit', 'Ot
 // Saved untouched, it counts as no context.
 // One blank line per heading, so all five headings fit in the box without scrolling.
 const CONTEXT_TEMPLATE = '## Background\n\n## Constraints\n\n## Tried so far\n\n## Outcome\n\n## Pick up\n';
-
-// The Preview toggle is remembered per browser, so people who like it keep it.
-const PREVIEW_KEY = 'vibetracker.contextPreview';
-const readPreview = () => {
-  try {
-    return window.localStorage.getItem(PREVIEW_KEY) === 'true';
-  } catch {
-    return false;
-  }
-};
 
 const relativeTime = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
 
@@ -48,7 +38,9 @@ function timeAgo(iso) {
  * Context (M9) is its own section: a Markdown briefing for whoever picks the
  * task up next, the AI tool it came from, and when it was last updated.
  * Closing with unsaved changes asks first, so a pasted log is never lost to Escape.
- * Both questions (discard changes, delete) use ConfirmDialog, not the browser's confirm().
+ * Discard changes asks with ConfirmDialog, not the browser's confirm(). Delete
+ * doesn't ask: it happens at once and the toast offers Undo (App), which is
+ * faster and safer than a question people learn to click through.
  * Layout: the task on the left and its Context on the right, as a sidebar:
  * the page's own grey, edge to edge between header and footer, with a thin line.
  * It groups the Context as its own area (common region) but reads as part of the
@@ -65,12 +57,24 @@ function timeAgo(iso) {
  * the order you work: write the context, say which AI tool, copy it.
  * Copy Context sits right next to the AI tool, not at the far edge, so the eye
  * and pointer travel less. Everything shares one left edge (no zigzag).
- * The buttons sit in a footer that never scrolls away.
+ * The buttons sit in a footer that never scrolls away, and the header has a
+ * line under it too, so the Context side starts cleanly below it.
+ * The dialog is max-w-5xl (about 1024px), not full width: the Context text
+ * stays near 60 characters a line (long lines are hard to track back), and
+ * some board stays visible around it. It never changes size. On two-column
+ * screens it is a fixed 44rem tall (or the screen, if shorter), so tall
+ * screens give the Context more lines. Only the Context grows: an empty
+ * Description box that size would suggest you should write an essay there.
+ * Preview is a quiet text button on the Context label's line, not an outlined
+ * box in the corner, so it doesn't compete with the × or pull the label down:
+ * "Context" lines up with "Title". It keeps its 44px target (negative margins).
+ * On wide screens the Context side gets 3/5 of the width (the task fields are
+ * short, the Context is long), so the text box and its preview each keep a
+ * readable line length (about 40 to 50 characters) side by side.
  * Preview (M9 stretch) is off by default, so the form stays calm. Turned on, it
- * shows the formatted Context live, next to the text box on wide screens and
- * under it on smaller ones. Nothing else on the form moves when it turns on, and
- * the preview scrolls with the text box, so both show the same part (no hunting
- * for your place in two boxes, which splits attention).
+ * shows the formatted Context in place of the text box, in exactly the same
+ * box, so nothing on the page moves (like GitHub's Write / Preview). One view
+ * at a time also means one thing to look at, not two boxes competing.
  */
 export default function TaskModal({ task, stages, members, onSave, onDelete, onClose, onCopied }) {
   const isEditing = task != null;
@@ -87,28 +91,12 @@ export default function TaskModal({ task, stages, members, onSave, onDelete, onC
   const [form, setForm] = useState(initialForm);
   const isDirty = Object.keys(form).some((field) => form[field] !== initialForm[field]);
   const titleRef = useRef(null);
-  // Which question is showing over the form: null, 'discard' or 'delete'.
+  // Which question is showing over the form: null or 'discard'.
   const [confirming, setConfirming] = useState(null);
   const cancelConfirm = useCallback(() => setConfirming(null), []);
-  const [preview, setPreview] = useState(readPreview);
-  const contextRef = useRef(null);
-  const previewRef = useRef(null);
-  // Keep the preview at the same point as the text box: same share scrolled.
-  const syncPreview = () => {
-    const from = contextRef.current;
-    const to = previewRef.current;
-    if (!from || !to || !preview) return;
-    const share = from.scrollTop / Math.max(1, from.scrollHeight - from.clientHeight);
-    to.scrollTop = share * (to.scrollHeight - to.clientHeight);
-  };
-  const togglePreview = () => {
-    setPreview(!preview);
-    try {
-      window.localStorage.setItem(PREVIEW_KEY, String(!preview));
-    } catch {
-      /* private mode: the toggle still works, it just isn't remembered */
-    }
-  };
+  // Every task opens in Write, so the box is always ready to type in and never
+  // surprises you by showing the last task's view.
+  const [preview, setPreview] = useState(false);
 
   // Move focus into the dialog on open and back to the opener on close.
   useEffect(() => {
@@ -148,9 +136,7 @@ export default function TaskModal({ task, stages, members, onSave, onDelete, onC
     onSave(formTask);
   };
 
-  const handleDelete = () => {
-    setConfirming('delete');
-  };
+  const handleDelete = () => onDelete(task.id);
 
   return (
     <div
@@ -162,20 +148,26 @@ export default function TaskModal({ task, stages, members, onSave, onDelete, onC
         aria-modal="true"
         aria-labelledby="task-modal-title"
         inert={confirming ? '' : undefined}
-        className={`flex max-h-[calc(100vh-2rem)] w-full max-w-6xl flex-col overflow-y-auto rounded-lg border-l-4 ${typeStyle(form.type).stripe} bg-surface-card shadow-xl`}
+        className={`flex max-h-[calc(100vh-2rem)] w-full lg:h-[44rem] max-w-5xl flex-col overflow-y-auto rounded-lg border-l-4 ${typeStyle(form.type).stripe} bg-surface-card shadow-xl`}
       >
-        <div className="flex items-center justify-between px-6 pb-2 pt-4">
+        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-2">
           {/* Type shows as the stripe (same as the card, M6) and the Type buttons, so no badge here too. */}
           <h2 id="task-modal-title" className="text-lg font-semibold text-text-primary">
             {isEditing ? 'Edit task' : 'New task'}
             {/* Screen readers hear which task the dialog is for, not just "Edit task". */}
             {isEditing && <span className="sr-only">: {initialForm.title}</span>}
+            {/* The created date (FR2) is stored on every task, so show it where the task's details are. */}
+            {isEditing && task.createdDate && (
+              <span className="ml-3 text-sm font-normal text-text-muted">
+                Added {new Date(`${task.createdDate}T00:00:00`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+              </span>
+            )}
           </h2>
           <button
             type="button"
             onClick={requestClose}
             aria-label="Close"
-            className="flex h-11 w-11 items-center justify-center rounded-md text-xl leading-none text-text-muted hover:bg-brand-accent focus:outline-none focus:ring-2 focus:ring-brand-primary"
+            className="flex h-11 w-11 items-center justify-center rounded-md text-xl leading-none text-text-muted hover:bg-brand-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary"
           >
             ×
           </button>
@@ -187,7 +179,7 @@ export default function TaskModal({ task, stages, members, onSave, onDelete, onC
               column that scrolls here, while the header and buttons stay put.
               On very short screens (e.g. 400% zoom) the whole dialog scrolls
               instead, so the buttons can never be cut off. */}
-          <div className="grid flex-1 grid-cols-1 gap-x-8 gap-y-6 px-6 [@media(min-height:480px)]:min-h-0 [@media(min-height:480px)]:overflow-y-auto pb-4 pt-2 lg:grid-cols-2">
+          <div className="grid flex-1 grid-cols-1 gap-x-8 gap-y-6 px-6 [@media(min-height:480px)]:min-h-0 [@media(min-height:480px)]:overflow-y-auto pb-4 pt-4 lg:grid-cols-2 lg:grid-rows-[minmax(0,1fr)] xl:grid-cols-[2fr_3fr]">
             <div>
               {/* 1. What: title first (it's required and where focus starts, so reading
                   order = Tab order), then type, which shapes how you describe it. */}
@@ -238,18 +230,22 @@ export default function TaskModal({ task, stages, members, onSave, onDelete, onC
                     rows={3}
                     value={form.description}
                     onChange={update('description')}
-                    className={inputClass}
+                    // Two lines on short laptop screens (e.g. 1366x650), so the whole form fits without scrolling.
+                    className={`${inputClass} [@media(max-height:700px)]:h-[3.75rem]`}
                   />
                 </div>
               </div>
 
               {/* 2. Who and when: a separate chunk below a thin line, like the card.
-                  The owner field is wider (a full row on small laptops, where
-                  the left half is narrow), so "Name (current)" fits. */}
-              <div className="mt-6 grid grid-cols-1 gap-4 border-t border-slate-200 pt-6 sm:grid-cols-[3fr_2fr_2fr] lg:grid-cols-2 xl:grid-cols-[3fr_2fr_2fr]">
-                <div className="lg:col-span-2 xl:col-span-1">
+                  The owner field gets a full row on laptops and up, where the
+                  left half is narrow, so "Name (current)" fits. */}
+              <div className="mt-4 grid grid-cols-1 gap-4 border-t border-slate-200 pt-4 sm:grid-cols-[3fr_2fr_2fr] lg:grid-cols-2">
+                <div className="lg:col-span-2">
                   <label htmlFor="task-assignee" className={labelClass}>{isEditing ? 'Hand off to…' : 'Owner'}</label>
                   <select id="task-assignee" value={form.assignee} onChange={update('assignee')} className={inputClass}>
+                    {/* A task whose owner was removed from the team says so, instead of
+                        quietly showing the first name in the list. */}
+                    {!members.includes(initialForm.assignee) && <option value={initialForm.assignee}>Unassigned</option>}
                     {members.map((name) => (
                       <option key={name} value={name}>
                         {isEditing && name === task.assignee ? `${name} (current)` : name}
@@ -280,55 +276,58 @@ export default function TaskModal({ task, stages, members, onSave, onDelete, onC
               </div>
             </div>
 
-            <div className="flex flex-col border-t border-slate-200 pt-6 lg:-mb-4 lg:-mr-6 lg:-mt-2 lg:border-l lg:border-t-0 lg:bg-surface-page lg:pb-4 lg:pl-8 lg:pr-6 lg:pt-2">
+            <div className="flex flex-col border-t border-slate-200 pt-6 lg:-mb-4 lg:-mr-6 lg:-mt-4 lg:border-l lg:border-t-0 lg:bg-surface-page lg:pb-4 lg:pl-8 lg:pr-6 lg:pt-4">
               {/* No help sentence: the template headings say what to write, and
                   Copy Context plus its toast say what it's for, at the moment it matters. */}
-              <div className="flex items-end justify-between gap-3">
+              <div className="flex items-center justify-between gap-3">
                 <label htmlFor="task-context" className={labelClass}>Context</label>
-                {/* Pressed looks like the other picked things in the app (indigo), and
-                    the word stays the same, so screen readers hear "Preview, pressed". */}
-                <button
-                  type="button"
-                  aria-pressed={preview}
-                  aria-controls="task-context-preview"
-                  onClick={togglePreview}
-                  className={`inline-flex min-h-11 items-center gap-2 rounded-md border px-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand-primary ${
-                    preview ? 'border-brand-primary bg-brand-accent text-brand-primary' : 'border-slate-500 bg-surface-card text-text-primary hover:bg-brand-accent'
-                  }`}
-                >
-                  <Eye className="h-4 w-4" aria-hidden="true" />
-                  Preview
-                </button>
+                {/* Write / Preview, both always shown, so you can see which one you're in
+                    and how to get back (recognition, not recall). The one you're in is
+                    indigo with a line under it, like a tab; colour is never the only sign.
+                    The focus ring shows for the keyboard only (a click already shows the
+                    underline) and sits inside the tab, so it never covers the box edge.
+                    The tabs sit right on the box's top edge, so they read as part of it
+                    (connectedness), and their text lines up with "Context". */}
+                <div role="group" aria-label="Context view" className="-mb-2.5 -mt-3.5 flex">
+                  {[
+                    [false, 'Write', PenLine],
+                    [true, 'Preview', Eye],
+                  ].map(([on, label, Icon]) => (
+                    <button
+                      key={label}
+                      type="button"
+                      aria-pressed={preview === on}
+                      onClick={() => setPreview(on)}
+                      className={`inline-flex min-h-11 items-center gap-1.5 rounded-t-md border-b-2 px-3 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-primary ${
+                        preview === on ? 'border-brand-primary text-brand-primary' : 'border-transparent text-text-muted hover:text-text-primary'
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" aria-hidden="true" />
+                      {label}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <div className={`mt-1.5 grid flex-1 gap-3 ${preview ? 'xl:grid-cols-2' : ''}`}>
+              <div className="relative mt-2.5 flex min-h-0 flex-1 flex-col">
+                {/* Turned invisible, not removed, while previewing: it keeps its size,
+                    so the preview drops into exactly the same space. */}
                 <textarea
                   id="task-context"
-                  ref={contextRef}
                   rows={10}
                   value={form.context}
                   onChange={update('context')}
-                  onScroll={syncPreview}
                   aria-describedby={task?.contextUpdatedAt ? 'task-context-updated' : undefined}
-                  className={`${inputClass} !mt-0 h-full resize-y font-mono leading-relaxed`}
+                  className={`${inputClass} !mt-0 min-h-40 flex-1 resize-y font-mono leading-relaxed ${preview ? 'invisible' : ''}`}
                 />
-                {/* Updates as you type. Beside the text box it's exactly as tall as
-                    it, so the form doesn't grow. It can also scroll on its own, so it
-                    can be reached with Tab (tabIndex 0) and scrolled with the arrow keys.
-                    The small title says what the box is, since it looks like text, not a field. */}
-                <div hidden={!preview} className="relative">
+                {/* Laid over the text box. It scrolls on its own, so it can be reached
+                    with Tab (tabIndex 0) and scrolled with the arrow keys. No title inside:
+                    the pressed Preview button already says what this is. */}
+                <div hidden={!preview}>
                   <section
-                    id="task-context-preview"
-                    ref={previewRef}
-                    aria-labelledby="task-context-preview-title"
+                    aria-label="Context preview"
                     tabIndex={0}
-                    className="max-h-80 overflow-y-auto rounded-md border border-slate-200 bg-surface-card px-4 pb-3 focus:outline-none focus:ring-2 focus:ring-brand-primary xl:absolute xl:inset-0 xl:max-h-none"
+                    className="absolute inset-0 overflow-y-auto rounded-md border border-slate-500 bg-surface-card px-4 py-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary"
                   >
-                    <h3
-                      id="task-context-preview-title"
-                      className="sticky top-0 -mx-4 mb-1 border-b border-slate-200 bg-surface-card px-4 py-1.5 text-xs font-medium text-text-muted"
-                    >
-                      Preview
-                    </h3>
                     <MarkdownPreview markdown={form.context} />
                   </section>
                 </div>
@@ -368,12 +367,12 @@ export default function TaskModal({ task, stages, members, onSave, onDelete, onC
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 px-6 py-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 px-6 py-3">
             {isEditing ? (
               <button
                 type="button"
                 onClick={handleDelete}
-                className="inline-flex min-h-11 items-center gap-2 rounded-md px-3 text-sm font-medium text-due-overdue hover:bg-due-overdue-bg focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                className="inline-flex min-h-11 items-center gap-2 rounded-md px-3 text-sm font-medium text-due-overdue hover:bg-due-overdue-bg focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary"
               >
                 <Trash2 className="h-4 w-4" aria-hidden="true" />
                 Delete task
@@ -387,13 +386,13 @@ export default function TaskModal({ task, stages, members, onSave, onDelete, onC
               <button
                 type="button"
                 onClick={requestClose}
-                className="min-h-11 whitespace-nowrap rounded-md border border-slate-500 px-4 text-sm font-medium text-text-primary hover:bg-brand-accent focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                className="min-h-11 whitespace-nowrap rounded-md border border-slate-500 px-4 text-sm font-medium text-text-primary hover:bg-brand-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="min-h-11 whitespace-nowrap rounded-md border border-transparent bg-brand-primary px-4 text-sm font-medium text-white hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2"
+                className="min-h-11 whitespace-nowrap rounded-md border border-transparent bg-brand-primary px-4 text-sm font-medium text-white hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
               >
                 {isEditing ? 'Save changes' : 'Add task'}
               </button>
@@ -410,15 +409,6 @@ export default function TaskModal({ task, stages, members, onSave, onDelete, onC
           confirmLabel="Discard"
           onCancel={cancelConfirm}
           onConfirm={onClose}
-        />
-      )}
-      {confirming === 'delete' && (
-        <ConfirmDialog
-          title="Delete this task?"
-          message={<><strong className="font-semibold text-text-primary">{task.title}</strong> will be deleted. You can't undo this.</>}
-          confirmLabel="Delete task"
-          onCancel={cancelConfirm}
-          onConfirm={() => onDelete(task.id)}
         />
       )}
     </div>
