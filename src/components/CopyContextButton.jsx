@@ -33,10 +33,12 @@ export function formatContext(task, statusLabel) {
 
 /**
  * "Copy context" button for a card or the modal. The label changes to
- * "Copied" for three seconds where the user is looking (as long as the toast),
+ * "Copied" for five seconds where the user is looking (as long as the toast),
  * and `onCopied(ok, hasContext)` lets App show the toast, which screen readers announce.
- * `quiet` (cards) keeps it slate until hover or focus, so a board full of
- * these doesn't use up the indigo that marks the main actions.
+ * `quiet` (cards) is icon + words in the brand indigo, like a link, with no
+ * outline until hover or focus: every card has one, so a row of outlined
+ * buttons would pull the eye from the titles, but grey text looked disabled. It looks 36px tall but its click area is 44px (a
+ * stretched ::before), so it stays easy to hit without looking heavy.
  */
 export default function CopyContextButton({ task, statusLabel, onCopied, quiet = false, className = '' }) {
   const [copied, setCopied] = useState(false);
@@ -48,7 +50,7 @@ export default function CopyContextButton({ task, statusLabel, onCopied, quiet =
       await navigator.clipboard.writeText(formatContext(task, statusLabel));
       setCopied(true);
       clearTimeout(timer.current);
-      timer.current = setTimeout(() => setCopied(false), 3000);
+      timer.current = setTimeout(() => setCopied(false), 5000);
       onCopied(true, Boolean(task.context?.trim()));
     } catch {
       onCopied(false);
@@ -60,7 +62,7 @@ export default function CopyContextButton({ task, statusLabel, onCopied, quiet =
     <button
       type="button"
       onClick={copy}
-      className={`inline-flex min-h-11 items-center gap-2 rounded-md px-3 text-sm font-medium ${quiet ? 'text-text-muted hover:text-brand-primary focus-visible:text-brand-primary' : 'text-brand-primary'} hover:bg-brand-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary ${className}`}
+      className={`relative inline-flex items-center gap-2 rounded-md px-3 ${quiet ? 'min-h-9 before:absolute before:-inset-y-1 before:inset-x-0 border border-transparent text-[13px] font-medium text-brand-primary hover:border-brand-primary' : 'min-h-11 text-sm font-medium text-brand-primary'} hover:bg-brand-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary ${className}`}
     >
       <Icon className="h-4 w-4" aria-hidden="true" />
       {copied ? 'Copied' : 'Copy Context'}

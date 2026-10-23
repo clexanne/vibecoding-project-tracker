@@ -1,4 +1,7 @@
 // Seed tasks shown on first load (before anything is saved to localStorage).
+// The sample project is the one on the hackathon's mission slide: a student
+// portfolio site (Hero copy, Fix nav, About page, CV layout, PRD done), so the
+// demo board looks like real work, not like the tracker describing itself.
 // Assignee values are full names from TEAM in App.jsx.
 // To see changes here after the first load, clear the 'vibetracker.tasks' key in localStorage.
 // Dates are relative to the day the board is first opened (M8), so a fresh
@@ -18,72 +21,155 @@ const hoursAgo = (hours) => new Date(Date.now() - hours * 3_600_000).toISOString
 export const SEED_TASKS = [
     {
         id: 'seed-1',
-        title: 'Set up the four-column board',
-        description: 'Render To Do, In Progress, Review and Done from STAGES.',
+        title: 'Write the hero copy',
+        description: 'Headline, one-line intro and a "See my work" button for the top of the home page.',
         type: 'feature',
-        status: 'done',
-        assignee: 'Alex Morgan',
-        dueDate: daysFromToday(-1), // done, so neutral even though the date has passed
-        createdDate: daysFromToday(-3),
+        status: 'todo',
+        assignee: 'Sam Patel',
+        dueDate: daysFromToday(5), // more than 2 days out: calm
+        createdDate: daysFromToday(-1),
+        context: `## Background
+The home page opens on a placeholder headline. Visitors are recruiters who give it **about 10 seconds**.
+
+## Constraints
+- Headline under 8 words.
+- Plain English, no "passionate" or "rockstar".
+- Button goes to \`#projects\`.
+
+## Tried so far
+Asked for 5 headline options. Favourite so far: **"I design apps people find easy."**
+
+## Outcome
+Not decided yet.
+
+## Pick up
+1. Pick one headline.
+2. Write the one-line intro under it.
+3. Add the button.
+`,
+        contextTool: 'ChatGPT',
+        contextUpdatedAt: hoursAgo(20),
     },
     {
         id: 'seed-2',
-        title: 'Add / edit task modal',
-        description: 'One modal for creating and editing tasks, with a status dropdown.',
-        type: 'feature',
+        title: 'Nav menu won\'t close on phones',
+        description: 'On phones, tapping a menu link scrolls to the section but the menu stays open over the page.',
+        type: 'bug',
         status: 'in-progress',
-        assignee: 'Sam Patel',
+        assignee: 'Jordan Lee',
         dueDate: daysFromToday(0), // due today: warning
         createdDate: daysFromToday(-2),
         context: `## Background
-Edit and create share one modal. It opens from "+ New task" or by clicking a card.
+Mobile menu in \`Navbar.jsx\`. Open it, tap **About**: the page scrolls, but the menu still covers it.
 
 ## Constraints
-- Escape closes it and focus goes back to the card.
-- Every control at least 44px tall.
+- Keep the menu keyboard friendly: **Escape** closes it, focus goes back to the menu button.
+- No new libraries.
 
 ## Tried so far
-Two separate modals drifted apart, so they were merged into one.
+- Closing on \`onClick\` of each link: works, but focus is lost.
+- Listening to \`hashchange\`: doesn't fire when the hash is already the same.
+
+## Outcome
+Menu closes on link click. Focus still needs fixing.
 
 ## Pick up
-Wire the Status select to move the card between columns.
+Move focus back to the menu button after it closes, then test on an iPhone.
 `,
         contextTool: 'Claude',
         contextUpdatedAt: hoursAgo(2),
     },
     {
         id: 'seed-3',
-        title: 'Copy button loses line breaks',
-        description: 'Pasted context arrives as one long line in ChatGPT.',
-        type: 'bug',
-        status: 'review',
-        assignee: 'Jordan Lee',
-        dueDate: daysFromToday(-2), // overdue: alarm
-        createdDate: daysFromToday(-5),
+        title: 'Build the About page',
+        description: 'Short bio, photo and three skills, linked from the nav.',
+        type: 'feature',
+        status: 'in-progress',
+        assignee: 'Alex Morgan',
+        dueDate: daysFromToday(3), // more than 2 days out: calm
+        createdDate: daysFromToday(-3),
         context: `## Background
-Copying a task's context and pasting it into ChatGPT gives one long line.
+New page at \`/about\`. Copy is in the shared doc; the photo is \`me.jpg\` in \`/public\`.
 
 ## Constraints
-Must paste cleanly into Claude, ChatGPT and Cursor.
+- Photo needs real alt text.
+- Same layout grid as the home page.
 
 ## Tried so far
-- \`navigator.clipboard.writeText\` with \`\\n\` joins: line breaks lost in ChatGPT only.
-- Suspect the text is built from \`innerText\` of a collapsed element.
+Generated the page in Lovable, then moved it into our repo. The photo was **1.8 MB**, so it now loads slowly.
+
+## Outcome
+Page and text done. Photo still too big.
 
 ## Pick up
-Build the string from the task data, not the DOM, and test in all three tools.
+Shrink \`me.jpg\` under 200 KB, then add the three skills as a list.
 `,
-        contextTool: 'ChatGPT',
-        contextUpdatedAt: hoursAgo(26),
+        contextTool: 'Lovable',
+        contextUpdatedAt: hoursAgo(5),
     },
     {
         id: 'seed-4',
-        title: 'Deliverable Anchor Board',
-        description: 'Four pinned cards for Presentation, Demo, Report and Documentation.',
+        title: 'CV layout breaks on phones',
+        description: 'The two-column CV page overflows below 400px wide, so you have to scroll sideways.',
+        type: 'bug',
+        status: 'review',
+        assignee: 'Sam Patel',
+        dueDate: daysFromToday(-1), // overdue: alarm
+        createdDate: daysFromToday(-4),
+        context: `## Background
+\`/cv\` uses a two-column grid. Below 400px the dates column pushes the page wider than the screen.
+
+## Constraints
+Must still print on one A4 page.
+
+## Tried so far
+- \`overflow-x: hidden\` on the body: hides the bug, but cuts off text.
+- Switched to one column under \`sm\`: fixed it.
+
+## Outcome
+Fixed with one column on phones. Print still fits one page.
+
+## Pick up
+Review on a real phone and approve, or reopen with a screenshot.
+`,
+        contextTool: 'Cursor',
+        contextUpdatedAt: hoursAgo(26),
+    },
+    {
+        id: 'seed-5',
+        title: 'Write the PRD',
+        description: 'Goals, pages and who does what for the portfolio site.',
         type: 'feature',
-        status: 'todo',
+        status: 'done',
         assignee: 'Alex Morgan',
-        dueDate: daysFromToday(6), // more than 2 days out: calm
-        createdDate: daysFromToday(0),
+        dueDate: daysFromToday(-3), // done, so neutral even though the date has passed
+        createdDate: daysFromToday(-6),
+        context: `## Background
+One page that says what the site is for and what "done" means.
+
+## Constraints
+Four pages only: Home, About, Projects, CV.
+
+## Tried so far
+Drafted with Claude from our interview notes, then edited as a team.
+
+## Outcome
+PRD agreed and saved as \`PRD.md\` in the repo.
+
+## Pick up
+Nothing left. Update it if we add a page.
+`,
+        contextTool: 'Claude',
+        contextUpdatedAt: hoursAgo(70),
     },
 ];
+
+// Deliverable links shown on first load (M11), so the board shows both dot
+// states: two filled, two still empty. Swap in your real links in the app.
+// To see changes here after the first load, clear 'vibetracker.anchors' in localStorage.
+export const SEED_ANCHORS = {
+    presentation: '',
+    demo: 'https://example.com/portfolio-demo',
+    report: '',
+    documentation: 'https://example.com/portfolio-docs',
+};

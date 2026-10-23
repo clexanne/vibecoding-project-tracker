@@ -19,11 +19,9 @@ Two or three references that capture the vibe (links to dribbble shots, screensh
 - Linear's board view: restrained neutrals, strong type hierarchy.
 - GitHub Projects: dense but readable cards with small status labels.
 - Things 3: generous whitespace, nothing shouts.
-
-Anti-references — what we are explicitly **not** trying to look like:
+  Anti-references — what we are explicitly **not** trying to look like:
 
 - Trello-style saturated rainbow cards where every colour fights for attention.
-
 ## 2. Color palette
 
 These are the colors the build milestones will reference. Once chosen, paste the hex values into `tailwind.config.js` so the rest of the team can use Tailwind utility classes (e.g. `bg-brand-primary`, `border-due-warning`).
@@ -43,8 +41,8 @@ These are the colors the build milestones will reference. Once chosen, paste the
 
 | Token | Hex | When used |
 |---|---|---|
-| `type-feature` | `#0F766E` (5.5:1 on white; always with icon + "Feature" label in a pill, tint `type-feature-bg` `#F0FDFA`, 5.3:1) | Cards tagged `feature` (accent stripe + icon) |
-| `type-bug` | `#A21CAF` (6.3:1 on white; always with icon + "Bug" label in a pill, tint `type-bug-bg` `#FDF4FF`, 5.9:1) | Cards tagged `bug` (accent stripe + icon) |
+| `type-feature` | `#0F766E` (5.5:1 on white; always with icon + "Feature" word; tint `type-feature-bg` `#F0FDFA`, 5.3:1, used behind the selected Type button) | Cards tagged `feature` (left stripe + icon and word in this colour; modal stripe + selected Type button) |
+| `type-bug` | `#7E22CE` violet (7.0:1 on white; always with icon + "Bug" word; tint `type-bug-bg` `#FAF5FF`, 6.5:1, used behind the selected Type button). Violet, not magenta, so it can't be mistaken for overdue red | Cards tagged `bug` (left stripe + icon and word in this colour; modal stripe + selected Type button) |
 
 ### Due-date states (M8 `due-tint`)
 
@@ -70,17 +68,15 @@ Suggested sizes (override only if the design demands it):
 - Card title: 14 px / medium
 - Body: 14 px / regular
 - Caption: 12 px / regular muted
-
 ## 4. Component principles
 
 One short sentence per element. These set the tone for the build phase — Person A's modal and Person B's anchor board should both feel like they came from this doc.
 
-- **Cards:** White with a 1px slate-200 border, a 4px left stripe in the type colour plus an icon and word, and the due tint behind; the whole card is a focusable button.
+- **Cards:** White with a 1px slate-200 border, a 4px left stripe in the type colour plus icon + word in that colour (no pill box), and the due tint behind. 
 - **Buttons:** Solid brand-primary with white text, rounded-md, at least 40px tall, with a visible 2px brand-primary focus ring.
-- **Modal:** Centered, max-width-lg, slate-900 backdrop at 50%, role="dialog" with labelled fields, Escape closes it and focus returns to the card.
+- **Modal:** Centered, max-width-6xl with the task on the left and its Context on the right so it fits one screen, buttons in a footer that never scrolls away, slate-900 backdrop at 50%, role="dialog" with labelled fields, Escape closes it and focus returns to the card.
 - **Empty states:** Dashed slate-300 border, muted text, never sad.
 - **Drag affordance (if used):** None for now; we use a status dropdown, which stays as the keyboard-friendly option even if drag arrives in M12.
-
 ## 5. Voice / microcopy
 
 Three lines of microcopy that capture the tone of the product. Keep it short — these are the words a stressed user reads at 11pm.
@@ -89,7 +85,7 @@ Three lines of microcopy that capture the tone of the product. Keep it short —
 |---|---|
 | "+" button label | + New task |
 | Empty column placeholder | Nothing here yet. Your next win goes here. |
-| Toast after "Copy as Prompt Context" | Copied. Paste it into your AI and pick up where you left off. |
+| Toast after "Copy as Prompt Context" | Copied to clipboard! Paste it into any AI tool to carry on. |
 | Confirm-delete message | Delete "{title}"? This can't be undone. |
 | Handoff toast (M7 `task-owner`) | Handed off to {name}. Their context is ready. |
 
@@ -99,7 +95,6 @@ The tracker probably doesn't need a logo, but it does need a name and a wordmark
 
 - **Product name:** Vibecoding Project Tracker
 - **Wordmark style:** "Vibecoding Project Tracker" in Inter 600 at 24px in brand-primary, no icon.
-
 ## 7. Out of scope (this hackathon)
 
 To keep design tight, the following are explicitly not part of `design-done`:
@@ -108,7 +103,6 @@ To keep design tight, the following are explicitly not part of `design-done`:
 - Multiple themes. One brand, applied consistently.
 - Animations beyond a 200 ms fade on toast notifications.
 - A custom icon set. Use [Lucide icons](https://lucide.dev) via Tailwind classes if you need any.
-
 ---
 
 *DESIGN.md version: hackathon-starter v1*

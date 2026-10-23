@@ -12,3 +12,10 @@ body {
   background-color: #f8fafc; /* slate-50 */
   color: #0f172a;            /* slate-900 */
 }
+
+/* Placeholder hints at 4.7:1 (slate-500) instead of Tailwind's 2.5:1 grey,
+   so they're readable with low vision or glasses. */
+input::placeholder,
+textarea::placeholder {
+  color: #64748b;
+}

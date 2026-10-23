@@ -62,7 +62,7 @@ export default function DueLabel({ task, today }) {
   const { Icon, text } = DUE_STATES[state];
 
   return (
-    <span className={`inline-flex items-center gap-1.5 text-xs font-semibold ${text}`}>
+    <span className={`inline-flex items-center gap-1.5 text-[13px] font-semibold ${text}`}>
       <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
       {dueText(task, today)}
       {state !== 'done' && (

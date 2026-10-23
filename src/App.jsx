@@ -1,29 +1,29 @@
 import { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react';
+import AnchorBoard, { DELIVERABLES } from './components/AnchorBoard.jsx';
 import Board from './components/Board.jsx';
+import BoardToolbar, { sortTasks } from './components/BoardToolbar.jsx';
 import TaskModal from './components/TaskModal.jsx';
-import TeamStrip from './components/TeamStrip.jsx';
+import { Users } from 'lucide-react';
+import TeamModal from './components/TeamModal.jsx';
 import Toast from './components/Toast.jsx';
-import { SEED_TASKS } from './data/seed.js';
+import { SEED_ANCHORS, SEED_TASKS } from './data/seed.js';
 
 /**
- * Vibecoding Project Tracker — starter scaffold.
+ * Vibecoding Project Tracker: a Kanban board for vibecoding projects, where
+ * every task keeps the context you need to pick it up again in any AI tool.
  *
- * This file is intentionally almost empty. The boilerplate (Vite, React,
- * Tailwind) is configured for you, plus a few shared constants and a
- * localStorage helper. Everything visible on screen, you build.
- *
- * Where to start (build sequence in Phase 3):
- *   - M4  data-model    : render the four columns and the task cards below.
- *   - M5  crud-modal    : add the "+" button modal and the edit-on-click modal.
- *   - M6  tag-style     : feature vs. bug color coding (uses DESIGN.md §2 colors).
- *   - M7  task-owner    : assignee badge + "Hand off to..." (the Owner field in the modal since M7.1).
- *   - M8  due-tint      : color cards by due date (uses DESIGN.md §2 due-state colors).
- *   - M9  context       : a curated Context briefing field on the modal.
- *   - M10 copy-context  : a "Copy context" button on each card and in the modal (CopyContextButton.jsx).
- *   - M11 anchors       : the Anchor Board above the Kanban.
- *   - M12 secret-sauce  : the one open-ended thing that makes your tracker yours.
- *
- * Search the file for `TODO M<n>` to find the right hook for each milestone.
+ * Where each milestone lives:
+ *   - M4  data-model    : the Task shape below, STAGES, and Board.jsx + TaskCard.jsx.
+ *   - M5  crud-modal    : TaskModal.jsx (add, edit, delete), saved with useLocalStorage.
+ *   - M6  tag-style     : TypeBadge.jsx (feature vs. bug colour + icon, card stripe).
+ *   - M7  task-owner    : Avatar on every card; "Hand off to…" in the modal; acknowledgeHandOff.
+ *   - M8  due-tint      : DueLabel.jsx (four due states) and useToday().
+ *   - M9  task-context  : the Context sidebar in TaskModal.jsx (template, AI tool, "Updated"),
+ *                         with a live Markdown preview (MarkdownPreview.jsx, the stretch goal).
+ *   - M10 copy-context  : CopyContextButton.jsx (on every card and in the modal) + the
+ *                         "Copied to clipboard" toast (the stretch goal).
+ *   - M11 project-deliverables : AnchorBoard.jsx, pinned above the board.
+ *   - Extras: BoardToolbar.jsx (owner/type filters, sort), TeamModal.jsx, ConfirmDialog.jsx.
  */
 
 /**
@@ -58,7 +58,7 @@ export const TEAM = [
   { id: 'u3', firstName: 'Jordan', lastName: 'Lee',    email: 'jordan.lee@example.com' },
 ];
 
-export const fullName = (member) => `${member.firstName} ${member.lastName}`;
+export const fullName = (member) => [member.firstName, member.lastName].filter(Boolean).join(' ');
 
 // Today as 'YYYY-MM-DD' in local time (toISOString would give the UTC date).
 const todayISO = () => {
@@ -141,8 +141,12 @@ export default function App() {
   };
 
   const deleteTask = (id) => {
+    const { title } = tasks.find((task) => task.id === id);
     setTasks(tasks.filter((task) => task.id !== id));
     setEditing(null);
+    showToast(`Deleted "${title}".`);
+    // The card that opened the modal is gone, so focus goes to the board, not lost on the page.
+    requestAnimationFrame(() => document.getElementById('board')?.focus());
   };
 
   // M7: toast + a brief ring on the card acknowledge a handoff.
@@ -155,39 +159,67 @@ export default function App() {
     timers.current.forEach(clearTimeout);
     timers.current = [
       setTimeout(() => setHighlightId(null), 1500),
-      setTimeout(() => setToast((current) => ({ ...current, visible: false })), 3000),
-      setTimeout(() => setToast({ message: '', visible: false }), 3200),
+      // 5 seconds, so slower readers can finish the longer messages.
+      setTimeout(() => setToast((current) => ({ ...current, visible: false })), 5000),
+      setTimeout(() => setToast({ message: '', visible: false }), 5200),
     ];
   }
 
   // Saving with a new Owner is a handoff (M7.1): ring the card and show a toast.
   function acknowledgeHandOff(id, name) {
     setHighlightId(id);
-    showToast(`Handed off to ${name}. Their context is ready.`);
+    showToast(`Handed off to ${name}.`);
   }
 
   // M10: the brief's wording, plus the next step. Says so when there's no context
   // yet, and if the browser blocks the clipboard, says what to do instead.
   const acknowledgeCopy = useCallback((ok, hasContext) => {
-    if (!ok) showToast('Couldn’t copy. Use “See what gets copied” in the task instead.');
+    if (!ok) showToast("Couldn't copy. Open the task and copy the Context by hand.");
     else if (!hasContext) showToast('Copied, but this task has no context yet.');
-    else showToast('Copied to clipboard! Paste it into any AI tool to carry on.');
+    else showToast('Copied to clipboard. Paste it into any AI tool to carry on.');
   }, []);
 
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
 
-  const members = TEAM.map(fullName);
+  // Team (DR2): starts as the mock TEAM, and anyone added is saved like the tasks.
+  const [team, setTeam] = useLocalStorage('vibetracker.team', TEAM);
+  const members = team.map(fullName);
+  const [teamOpen, setTeamOpen] = useState(false);
+  const closeTeam = useCallback(() => setTeamOpen(false), []);
+
+  const addMember = (fields) => {
+    const member = { ...fields, id: newId() };
+    setTeam([...team, member]);
+    // No toast here: it would cover the dialog's buttons. The Team dialog says it inline.
+  };
+
+  // Picking a teammate shows only their tasks; null ("Everyone") shows all.
+  const [focusName, setFocusName] = useState(null);
+  const [typeId, setTypeId] = useState(null);
+  const [sortId, setSortId] = useState('due');
+  const filtered = tasks.filter((task) => (!focusName || task.assignee === focusName) && (!typeId || task.type === typeId));
+  const visibleTasks = sortTasks(filtered, sortId);
+  const clearFilters = () => {
+    setFocusName(null);
+    setTypeId(null);
+  };
 
   // M7.1: while the modal is open, the page behind it is inert, so Tab and
   // screen readers stay inside the dialog. A layout effect, so the page is
   // live again before the modal hands focus back to the card that opened it.
   const pageRef = useRef(null);
   useLayoutEffect(() => {
-    if (pageRef.current) pageRef.current.inert = editing != null;
-  }, [editing]);
+    if (pageRef.current) pageRef.current.inert = editing != null || teamOpen;
+  }, [editing, teamOpen]);
 
-  // TODO M11 anchors:
-  //   const [anchors, setAnchors] = useLocalStorage('vibetracker.anchors', [...]);
+  // M11: one link per deliverable, saved like the tasks so it survives a reload.
+  const [anchors, setAnchors] = useLocalStorage('vibetracker.anchors', SEED_ANCHORS);
+
+  const saveAnchor = (id, url) => {
+    setAnchors((current) => ({ ...current, [id]: url }));
+    const { label } = DELIVERABLES.find((deliverable) => deliverable.id === id);
+    showToast(url ? `${label} link saved.` : `${label} link removed.`);
+  };
 
   return (
     <div className="min-h-screen bg-surface-page font-sans">
@@ -199,36 +231,71 @@ export default function App() {
           Skip to board
         </a>
 
-        <header className="mb-10 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-semibold text-brand-primary">
+        <header className="-mx-4 -mt-4 mb-6 flex flex-wrap items-center gap-x-8 gap-y-3 border-b border-slate-200 bg-surface-card px-4 py-3 sm:-mx-8 sm:-mt-8 sm:px-8">
+          {/* Logo top left, linked home, as people expect. The mark is a mini
+              board (columns of cards), so it says what the tool is. It keeps
+              its colours in high-contrast mode, or the white mark would vanish. */}
+          <a
+            href="/"
+            className="inline-flex items-center gap-3 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
+          >
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-primary forced-color-adjust-none">
+              <svg viewBox="0 0 24 24" className="h-7 w-7 fill-white" aria-hidden="true">
+                <rect x="3" y="4" width="5" height="4" rx="1" />
+                <rect x="3" y="10" width="5" height="4" rx="1" />
+                <rect x="3" y="16" width="5" height="4" rx="1" />
+                <rect x="9.5" y="4" width="5" height="4" rx="1" />
+                <rect x="9.5" y="10" width="5" height="4" rx="1" />
+                <rect x="16" y="4" width="5" height="4" rx="1" />
+              </svg>
+            </span>
+            <h1 className="text-xl font-semibold text-brand-primary sm:text-2xl">
               Vibecoding Project Tracker
+              <span className="sr-only">, home</span>
             </h1>
-            <p className="text-sm text-text-muted">
-              Every task, and the prompt behind it, in one place.
-            </p>
-          </div>
+          </a>
+          {/* The team lives in its own dialog, so the board keeps the prime space. */}
           <button
             type="button"
-            onClick={() => setEditing('new')}
-            className="min-h-11 rounded-md bg-brand-primary px-4 text-sm font-medium text-white hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2"
+            onClick={() => setTeamOpen(true)}
+            className="ml-auto flex min-h-11 items-center gap-2 rounded-md border border-slate-500 bg-surface-card px-4 text-sm font-medium text-text-primary hover:bg-brand-accent focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2"
           >
-            + New task
+            <Users className="h-4 w-4 text-text-muted" aria-hidden="true" />
+            Team
+            <span className="text-text-muted">
+              {members.length}
+              <span className="sr-only"> people</span>
+            </span>
           </button>
         </header>
 
-        {/* TODO M11 anchors: render the Anchor Board (Presentation / Demo / Report / Documentation) above the board. */}
+        {/* Everything below the header is the page's main content, so a screen
+            reader's "jump to main" lands on Deliverables, not halfway down. */}
+        <main>
+          <AnchorBoard anchors={anchors} onSave={saveAnchor} />
 
-        <TeamStrip members={members} tasks={tasks} />
+          <BoardToolbar
+            onNewTask={() => setEditing('new')}
+            members={members}
+            focusName={focusName}
+            onFocus={setFocusName}
+            typeId={typeId}
+            onType={setTypeId}
+            onClear={clearFilters}
+            sortId={sortId}
+            onSort={setSortId}
+          />
 
-        <Board
-          stages={STAGES}
-          tasks={tasks}
-          today={today}
-          highlightId={highlightId}
-          onOpenTask={setEditing}
-          onCopied={acknowledgeCopy}
-        />
+          <Board
+            stages={STAGES}
+            tasks={visibleTasks}
+            today={today}
+            highlightId={highlightId}
+            onOpenTask={setEditing}
+            onCopied={acknowledgeCopy}
+            emptyText={focusName || typeId ? 'No matching tasks here' : undefined}
+          />
+        </main>
       </div>
 
       {editing && (
@@ -242,6 +309,8 @@ export default function App() {
           onCopied={acknowledgeCopy}
         />
       )}
+
+      {teamOpen && <TeamModal team={team} onAdd={addMember} onClose={closeTeam} />}
 
       <Toast message={toast.message} visible={toast.visible} />
     </div>
