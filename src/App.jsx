@@ -367,7 +367,7 @@ export default function App() {
               its colours in high-contrast mode, or the white mark would vanish. */}
           <a
             href="/"
-            className="inline-flex min-w-0 flex-1 items-center gap-3 rounded-md sm:flex-none focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
+            className="inline-flex min-w-min flex-1 items-center gap-3 rounded-md sm:flex-none focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
           >
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-primary forced-color-adjust-none">
               <svg viewBox="0 0 24 24" className="h-7 w-7 fill-white" aria-hidden="true">
@@ -392,9 +392,9 @@ export default function App() {
           >
             <Users className="h-4 w-4 text-text-muted" aria-hidden="true" />
             Team
+            {/* "· 3 people", not a bare "3", which could pass for an alert count. */}
             <span className="text-text-muted">
-              {members.length}
-              <span className="sr-only"> people</span>
+              · {members.length === 1 ? '1 person' : `${members.length} people`}
             </span>
           </button>
         </header>

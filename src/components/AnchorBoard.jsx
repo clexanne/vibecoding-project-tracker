@@ -58,24 +58,22 @@ function AnchorCard({ id, label, Icon, url, onSave }) {
           four take about half the height and the board starts sooner. Below 360px
           (e.g. 400% zoom) there is no room for both, so it goes back above. */}
       <h3 className="flex w-32 shrink-0 flex-wrap items-center gap-x-2 text-sm font-semibold text-text-primary max-[359px]:mb-1.5 max-[359px]:w-auto sm:mb-1.5 sm:w-auto">
-        <span
-          className={`h-2.5 w-2.5 shrink-0 rounded-full ${url ? 'bg-brand-primary' : 'border-2 border-slate-500'}`}
-          aria-hidden="true"
-        />
         <label htmlFor={inputId}>
           {label}
           <span className="sr-only">{url ? ' link, linked' : ' link, not linked'}</span>
         </label>
         {/* The status in words too, not just the dot (NFR: colour never alone).
             Screen readers already hear it in the label, so this copy is hidden from them.
-            It sits right after the name, so the dot, name and status read as one unit
-            (proximity) and nobody zoomed in has to look across the card for it.
-            On phones the name column is narrow, so it goes under the name instead. */}
+            The dot sits with the word it stands for, like a status badge, and both sit
+            right after the name (proximity), so nobody zoomed in has to look across the card.
+            On phones the name column is narrow, so the status goes under the name instead. */}
         <span
           aria-hidden="true"
-          className="basis-full pl-[18px] text-[13px] font-normal text-text-muted max-[359px]:basis-auto max-[359px]:pl-0 sm:basis-auto sm:pl-0"
+          className="inline-flex basis-full items-center gap-1.5 text-[13px] font-normal text-text-muted max-[359px]:basis-auto sm:basis-auto"
         >
-          <span className="hidden max-[359px]:inline sm:inline">· </span>
+          <span
+            className={`h-2.5 w-2.5 shrink-0 rounded-full ${url ? 'bg-brand-primary' : 'border-2 border-slate-500'}`}
+          />
           {url ? 'Linked' : 'Not linked'}
         </span>
       </h3>

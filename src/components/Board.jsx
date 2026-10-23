@@ -136,19 +136,20 @@ export default function Board({ stages, tasks, today, highlightId, onOpenTask, o
                     {columnTasks.length}
                   </span>
                 </h2>
-                {/* Not on phones, where only one column shows anyway. Negative margins
-                    keep the 44px target without making this header taller than the others. */}
+                {/* Not on phones, where only one column shows anyway. A word, not just ">>",
+                    so nobody has to guess what it does; the icon points where the column goes.
+                    Negative margins keep the 44px target without making this header taller. */}
                 {collapsible && (
                   <button
                     type="button"
                     aria-expanded={!collapsed}
                     aria-controls={listId}
                     onClick={toggleDone}
-                    title={collapsed ? 'Show Done' : 'Collapse Done'}
-                    className="-my-2 -mr-2 hidden h-11 w-11 shrink-0 items-center justify-center rounded-md text-text-muted hover:bg-surface-card hover:text-text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary sm:inline-flex"
+                    className="-my-2 -mr-2 hidden h-11 shrink-0 items-center justify-center gap-1 rounded-md px-2 text-sm font-medium text-text-muted hover:bg-surface-card hover:text-text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary sm:inline-flex"
                   >
-                    {collapsed ? <ChevronsLeft className="h-5 w-5" aria-hidden="true" /> : <ChevronsRight className="h-5 w-5" aria-hidden="true" />}
-                    <span className="sr-only">{collapsed ? 'Show Done tasks' : 'Collapse Done'}</span>
+                    {collapsed ? 'Show' : 'Hide'}
+                    <span className="sr-only"> Done tasks</span>
+                    {collapsed ? <ChevronsLeft className="h-4 w-4" aria-hidden="true" /> : <ChevronsRight className="h-4 w-4" aria-hidden="true" />}
                   </button>
                 )}
               </div>
