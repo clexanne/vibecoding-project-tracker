@@ -1,7 +1,9 @@
-import { Users } from 'lucide-react';
+import { LogOut, Users } from 'lucide-react';
 import { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react';
 import AnchorBoard, { DELIVERABLES } from './components/AnchorBoard.jsx';
 import Board from './components/Board.jsx';
+import SignIn from './components/SignIn.jsx';
+import { Avatar } from './components/TaskCard.jsx';
 import BoardToolbar, { sortTasks } from './components/BoardToolbar.jsx';
 import TaskModal from './components/TaskModal.jsx';
 import TeamModal from './components/TeamModal.jsx';
@@ -298,6 +300,24 @@ export default function App() {
   const [teamOpen, setTeamOpen] = useState(false);
   const closeTeam = useCallback(() => setTeamOpen(false), []);
 
+  // Mock sign-in: only the member's id is saved, so a renamed member stays
+  // signed in under their new name. If they're removed, the lookup finds
+  // nobody and the sign-in screen comes back.
+  const [sessionId, setSessionId] = useLocalStorage('vibetracker.session', null);
+  const currentUser = team.find((member) => member.id === sessionId) ?? null;
+  const signOut = () => {
+    setTeamOpen(false);
+    setEditing(null);
+    setSessionId(null);
+  };
+  // Also closes any dialog left open, e.g. after you remove yourself from the
+  // team, so the next person starts on the board and not inside a dialog.
+  const signIn = (id) => {
+    setTeamOpen(false);
+    setEditing(null);
+    setSessionId(id);
+  };
+
   const addMember = (fields) => {
     const member = { ...fields, id: newId() };
     setTeam([...team, member]);
@@ -352,6 +372,9 @@ export default function App() {
     showToast(url ? `${label} link saved.` : `${label} link removed.`);
   };
 
+  // Nobody signed in: the sign-in screen replaces the whole board.
+  if (!currentUser) return <SignIn team={team} onSignIn={signIn} />;
+
   return (
     <div className="min-h-screen bg-surface-page font-sans">
       <div ref={pageRef} className="p-4 sm:p-8">
@@ -390,10 +413,28 @@ export default function App() {
               reads as a button at a glance (similarity). A people icon plus the word
               "Team" says what it opens, and the count says how many, like the column
               counts. No initials here: three circles in a box looked like decoration. */}
+          {/* Who is signed in, with the same avatar as the cards so people recognise
+              it. The name hides on narrow screens to keep the header on two rows;
+              screen readers still hear it. */}
+          <div className="ml-auto flex shrink-0 items-center gap-2">
+            <Avatar name={fullName(currentUser)} />
+            <span className="sr-only sm:not-sr-only text-sm font-medium text-text-primary">
+              <span className="sr-only">Signed in as </span>
+              {fullName(currentUser)}
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={signOut}
+            className="flex min-h-11 shrink-0 items-center gap-2 rounded-md border border-slate-500 bg-surface-card px-4 text-sm font-medium text-text-primary hover:bg-brand-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
+          >
+            <LogOut className="h-5 w-5 text-brand-primary" aria-hidden="true" />
+            Sign out
+          </button>
           <button
             type="button"
             onClick={() => setTeamOpen(true)}
-            className="ml-auto flex min-h-11 shrink-0 items-center gap-2 rounded-md border border-slate-500 bg-surface-card px-4 text-sm font-semibold text-text-primary hover:bg-brand-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
+            className="flex min-h-11 shrink-0 items-center gap-2 rounded-md border border-slate-500 bg-surface-card px-4 text-sm font-semibold text-text-primary hover:bg-brand-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
           >
             <Users className="h-5 w-5 text-brand-primary" aria-hidden="true" />
             Team
