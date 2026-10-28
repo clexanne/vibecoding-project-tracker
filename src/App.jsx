@@ -1,13 +1,13 @@
-import { LogOut, Users } from 'lucide-react';
+import { Users } from 'lucide-react';
 import { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react';
 import AnchorBoard, { DELIVERABLES } from './components/AnchorBoard.jsx';
 import Board from './components/Board.jsx';
 import SignIn from './components/SignIn.jsx';
-import { Avatar } from './components/TaskCard.jsx';
 import BoardToolbar, { sortTasks } from './components/BoardToolbar.jsx';
 import TaskModal from './components/TaskModal.jsx';
 import TeamModal from './components/TeamModal.jsx';
 import Toast from './components/Toast.jsx';
+import UserMenu from './components/UserMenu.jsx';
 import { SEED_ANCHORS, SEED_TASKS } from './data/seed.js';
 
 /**
@@ -310,13 +310,6 @@ export default function App() {
     setEditing(null);
     setSessionId(null);
   };
-  // Also closes any dialog left open, e.g. after you remove yourself from the
-  // team, so the next person starts on the board and not inside a dialog.
-  const signIn = (id) => {
-    setTeamOpen(false);
-    setEditing(null);
-    setSessionId(id);
-  };
 
   const addMember = (fields) => {
     const member = { ...fields, id: newId() };
@@ -373,7 +366,7 @@ export default function App() {
   };
 
   // Nobody signed in: the sign-in screen replaces the whole board.
-  if (!currentUser) return <SignIn team={team} onSignIn={signIn} />;
+  if (!currentUser) return <SignIn team={team} onSignIn={setSessionId} />;
 
   return (
     <div className="min-h-screen bg-surface-page font-sans">
@@ -412,38 +405,26 @@ export default function App() {
               Built like the toolbar controls (same height, corners and border), so it
               reads as a button at a glance (similarity). A people icon plus the word
               "Team" says what it opens, and the count says how many, like the column
-              counts. No initials here: three circles in a box looked like decoration. */}
-          {/* Who is signed in, with the same avatar as the cards so people recognise
-              it. The name hides on narrow screens to keep the header on two rows;
-              screen readers still hear it. */}
-          <div className="ml-auto flex shrink-0 items-center gap-2">
-            <Avatar name={fullName(currentUser)} />
-            <span className="sr-only sm:not-sr-only text-sm font-medium text-text-primary">
-              <span className="sr-only">Signed in as </span>
-              {fullName(currentUser)}
-            </span>
+              counts. No initials here: three circles in a box looked like decoration.
+              Team and the account menu wrap as one group, so on a phone they
+              share the second row, right-aligned. */}
+          <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
+            <button
+              type="button"
+              onClick={() => setTeamOpen(true)}
+              className="flex min-h-11 shrink-0 items-center gap-2 rounded-md border border-slate-500 bg-surface-card px-4 text-sm font-semibold text-text-primary hover:bg-brand-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
+            >
+              <Users className="h-5 w-5 text-brand-primary" aria-hidden="true" />
+              Team
+              <span className="min-w-7 rounded-full bg-slate-100 px-2 py-0.5 text-center text-sm font-medium text-text-muted">
+                <span className="sr-only">, </span>
+                {members.length}
+                <span className="sr-only">{members.length === 1 ? ' person' : ' people'}</span>
+              </span>
+            </button>
+            {/* Who is signed in, far right as in most apps; Sign out is in its menu. */}
+            <UserMenu name={fullName(currentUser)} onSignOut={signOut} />
           </div>
-          <button
-            type="button"
-            onClick={signOut}
-            className="flex min-h-11 shrink-0 items-center gap-2 rounded-md border border-slate-500 bg-surface-card px-4 text-sm font-medium text-text-primary hover:bg-brand-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
-          >
-            <LogOut className="h-5 w-5 text-brand-primary" aria-hidden="true" />
-            Sign out
-          </button>
-          <button
-            type="button"
-            onClick={() => setTeamOpen(true)}
-            className="flex min-h-11 shrink-0 items-center gap-2 rounded-md border border-slate-500 bg-surface-card px-4 text-sm font-semibold text-text-primary hover:bg-brand-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
-          >
-            <Users className="h-5 w-5 text-brand-primary" aria-hidden="true" />
-            Team
-            <span className="min-w-7 rounded-full bg-slate-100 px-2 py-0.5 text-center text-sm font-medium text-text-muted">
-              <span className="sr-only">, </span>
-              {members.length}
-              <span className="sr-only">{members.length === 1 ? ' person' : ' people'}</span>
-            </span>
-          </button>
         </header>
 
         {/* Everything below the header is the page's main content, so a screen
@@ -482,6 +463,7 @@ export default function App() {
           task={editing === 'new' ? null : editing}
           stages={STAGES}
           members={members}
+          defaultOwner={fullName(currentUser)}
           onSave={saveTask}
           onDelete={deleteTask}
           onClose={closeModal}
@@ -493,6 +475,7 @@ export default function App() {
         <TeamModal
           team={team}
           tasks={tasks}
+          currentUserId={currentUser.id}
           onAdd={addMember}
           onUpdate={updateMember}
           onRemove={removeMember}

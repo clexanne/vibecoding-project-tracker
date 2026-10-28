@@ -76,14 +76,15 @@ function timeAgo(iso) {
  * box, so nothing on the page moves (like GitHub's Write / Preview). One view
  * at a time also means one thing to look at, not two boxes competing.
  */
-export default function TaskModal({ task, stages, members, onSave, onDelete, onClose, onCopied }) {
+export default function TaskModal({ task, stages, members, defaultOwner, onSave, onDelete, onClose, onCopied }) {
   const isEditing = task != null;
   const [initialForm] = useState(() => ({
     title: task?.title ?? '',
     description: task?.description ?? '',
     type: task?.type ?? 'feature',
     status: task?.status ?? 'todo',
-    assignee: task?.assignee ?? members[0] ?? '',
+    // A new task starts as yours: you're usually adding work you'll do.
+    assignee: task?.assignee ?? (members.includes(defaultOwner) ? defaultOwner : members[0]) ?? '',
     dueDate: task?.dueDate ?? '',
     context: task?.context || CONTEXT_TEMPLATE,
     contextTool: task?.contextTool ?? '',
@@ -133,6 +134,12 @@ export default function TaskModal({ task, stages, members, onSave, onDelete, onC
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    // Spaces alone pass "required", but would save a card with no title.
+    if (!formTask.title) {
+      titleRef.current.setCustomValidity('Enter a title.');
+      titleRef.current.reportValidity();
+      return;
+    }
     onSave(formTask);
   };
 
@@ -193,7 +200,10 @@ export default function TaskModal({ task, stages, members, onSave, onDelete, onC
                     ref={titleRef}
                     required
                     value={form.title}
-                    onChange={update('title')}
+                    onChange={(event) => {
+                      event.target.setCustomValidity('');
+                      update('title')(event);
+                    }}
                     className={inputClass}
                   />
                 </div>

@@ -45,6 +45,12 @@ function MemberForm({ heading, submitLabel, initial, takenNames, onSubmit, onCan
   const handleSubmit = (event) => {
     event.preventDefault();
     const name = form.name.trim().replace(/\s+/g, ' ');
+    // Spaces alone pass "required", but would add someone with no name.
+    if (!name) {
+      setError('Enter a name.');
+      nameRef.current?.focus();
+      return;
+    }
     if (takenNames.some((taken) => taken.toLowerCase() === name.toLowerCase())) {
       setError('Someone on the team already has this name. Add a surname or initial.');
       nameRef.current?.focus();
@@ -165,7 +171,7 @@ function MemberForm({ heading, submitLabel, initial, takenNames, onSubmit, onCan
  * when something would be lost keeps the question meaningful, so it isn't
  * clicked past out of habit.
  */
-export default function TeamModal({ team, tasks, onAdd, onUpdate, onRemove, onClose }) {
+export default function TeamModal({ team, tasks, currentUserId, onAdd, onUpdate, onRemove, onClose }) {
   const members = team.map(fullName);
   const [status, setStatus] = useState('');
   // What the window is doing: null (the list), 'add', or the id of the person being edited.
@@ -277,7 +283,8 @@ export default function TeamModal({ team, tasks, onAdd, onUpdate, onRemove, onCl
                     }}
                     onCancel={requestCancel}
               onDirtyChange={setFormDirty}
-                    onRemove={team.length > 1 ? () => setRemoving(member) : undefined}
+                    // Not for yourself: removing you would sign you out mid-edit.
+                    onRemove={team.length > 1 && member.id !== currentUserId ? () => setRemoving(member) : undefined}
                   />
                 </li>
               );
@@ -287,7 +294,10 @@ export default function TeamModal({ team, tasks, onAdd, onUpdate, onRemove, onCl
               <li key={member.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-3">
                 <Avatar name={name} size="lg" />
                 <div className="min-w-0 flex-1">
-                  <p className="text-base font-medium text-text-primary">{name}</p>
+                  <p className="text-base font-medium text-text-primary">
+                    {name}
+                    {member.id === currentUserId && <span className="font-normal text-text-muted"> (you)</span>}
+                  </p>
                   {contact && <p className="truncate text-sm text-text-muted">{contact}</p>}
                 </div>
                 {/* One quiet Edit per person, like Copy Context on the cards. Remove
